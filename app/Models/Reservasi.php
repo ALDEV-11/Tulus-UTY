@@ -14,7 +14,7 @@ class Reservasi extends Model
     public function pelanggan() { return $this->belongsTo(User::class, 'user_id'); }
     public function kendaraan() { return $this->belongsTo(Kendaraan::class); }
     public function slot() { return $this->belongsTo(SlotWaktu::class, 'id_slot'); }
-    public function layanan() { return $this->belongsToMany(Layanan::class, 'reservasi_layanan')->withPivot(['jumlah', 'harga'])->withTimestamps(); }
+    public function layanan() { return $this->belongsToMany(Layanan::class, 'reservasi_layanan')->withPivot('jumlah')->withTimestamps(); }
     public function servis() { return $this->hasOne(Servis::class); }
     public function whatsappLogs() { return $this->hasMany(WhatsappLog::class); }
 }

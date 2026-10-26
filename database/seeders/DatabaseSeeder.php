@@ -41,12 +41,12 @@ class DatabaseSeeder extends Seeder
         $merks = collect($merkNames)->mapWithKeys(fn (string $nama) => [$nama => MerkMotor::create(['nama' => $nama])]);
 
         $layananData = [
-            ['nama' => 'Servis Ringan', 'deskripsi' => 'Pemeriksaan dan penyetelan dasar', 'durasi_menit' => 60, 'harga' => 75000, 'interval_servis_km' => 2000],
-            ['nama' => 'Servis Lengkap', 'deskripsi' => 'Pemeriksaan menyeluruh kendaraan', 'durasi_menit' => 120, 'harga' => 180000, 'interval_servis_km' => 5000],
-            ['nama' => 'Ganti Oli Mesin', 'deskripsi' => 'Penggantian oli mesin', 'durasi_menit' => 30, 'harga' => 55000, 'interval_servis_km' => 2000],
-            ['nama' => 'Ganti Oli Gardan', 'deskripsi' => 'Khusus motor matic', 'durasi_menit' => 30, 'harga' => 35000, 'interval_servis_km' => 4000],
-            ['nama' => 'Tune Up', 'deskripsi' => 'Setel performa dan pembakaran mesin', 'durasi_menit' => 90, 'harga' => 125000, 'interval_servis_km' => 10000],
-            ['nama' => 'Ganti Kampas Rem', 'deskripsi' => 'Penggantian kampas rem depan atau belakang', 'durasi_menit' => 60, 'harga' => 100000, 'interval_servis_km' => null],
+            ['nama' => 'Servis Ringan', 'deskripsi' => 'Pemeriksaan dan penyetelan dasar', 'durasi_menit' => 60, 'interval_servis_km' => 2000],
+            ['nama' => 'Servis Lengkap', 'deskripsi' => 'Pemeriksaan menyeluruh kendaraan', 'durasi_menit' => 120, 'interval_servis_km' => 5000],
+            ['nama' => 'Ganti Oli Mesin', 'deskripsi' => 'Penggantian oli mesin', 'durasi_menit' => 30, 'interval_servis_km' => 2000],
+            ['nama' => 'Ganti Oli Gardan', 'deskripsi' => 'Khusus motor matic', 'durasi_menit' => 30, 'interval_servis_km' => 4000],
+            ['nama' => 'Tune Up', 'deskripsi' => 'Setel performa dan pembakaran mesin', 'durasi_menit' => 90, 'interval_servis_km' => 10000],
+            ['nama' => 'Ganti Kampas Rem', 'deskripsi' => 'Penggantian kampas rem depan atau belakang', 'durasi_menit' => 60, 'interval_servis_km' => null],
         ];
         $layanans = collect($layananData)->mapWithKeys(fn (array $data) => [$data['nama'] => Layanan::create($data)]);
 
@@ -78,8 +78,8 @@ class DatabaseSeeder extends Seeder
             'keluhan' => 'Mesin terasa kurang responsif',
         ]);
         $reservasi1->layanan()->attach([
-            $layanans['Servis Ringan']->id => ['harga' => $layanans['Servis Ringan']->harga],
-            $layanans['Ganti Oli Mesin']->id => ['harga' => $layanans['Ganti Oli Mesin']->harga],
+            $layanans['Servis Ringan']->id => ['jumlah' => 1],
+            $layanans['Ganti Oli Mesin']->id => ['jumlah' => 1],
         ]);
 
         $reservasi2 = Reservasi::create([
@@ -87,14 +87,14 @@ class DatabaseSeeder extends Seeder
             'kode' => 'RSV-DEMO-002', 'status' => StatusReservasi::MenungguKonfirmasi,
             'keluhan' => 'Ingin servis berkala 10.000 km',
         ]);
-        $reservasi2->layanan()->attach($layanans['Servis Lengkap']->id, ['harga' => $layanans['Servis Lengkap']->harga]);
+        $reservasi2->layanan()->attach($layanans['Servis Lengkap']->id, ['jumlah' => 1]);
 
         $reservasi3 = Reservasi::create([
             'user_id' => $pelanggan->id, 'kendaraan_id' => $kendaraan1->id, 'id_slot' => $slots[9]->id,
             'kode' => 'RSV-DEMO-003', 'status' => StatusReservasi::Selesai,
             'keluhan' => 'Penggantian kampas rem',
         ]);
-        $reservasi3->layanan()->attach($layanans['Ganti Kampas Rem']->id, ['harga' => $layanans['Ganti Kampas Rem']->harga]);
+        $reservasi3->layanan()->attach($layanans['Ganti Kampas Rem']->id, ['jumlah' => 1]);
 
         Servis::create([
             'reservasi_id' => $reservasi1->id, 'kendaraan_id' => $kendaraan1->id, 'mekanik_id' => $admin->id,

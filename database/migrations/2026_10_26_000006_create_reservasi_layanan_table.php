@@ -13,7 +13,6 @@ return new class extends Migration
             $table->foreignId('reservasi_id')->constrained('reservasi')->cascadeOnDelete();
             $table->foreignId('layanan_id')->constrained('layanan')->restrictOnDelete();
             $table->unsignedInteger('jumlah')->default(1);
-            $table->decimal('harga', 12, 2)->default(0);
             $table->timestamps();
             $table->unique(['reservasi_id', 'layanan_id']);
         });
