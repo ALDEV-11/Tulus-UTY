@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Administrator',
             'email' => 'admin@aldi-motor.test',
-            'no_hp' => '081234567890',
+            'no_hp' => '6281234567890',
             'role' => UserRole::Admin,
             'password' => 'password',
         ]);
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
         $pelanggan = User::create([
             'name' => 'Pelanggan Demo',
             'email' => 'pelanggan@aldi-motor.test',
-            'no_hp' => '081298765432',
+            'no_hp' => '6281298765432',
             'role' => UserRole::Pelanggan,
             'password' => 'password',
         ]);

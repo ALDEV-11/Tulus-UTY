@@ -23,7 +23,15 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto"></ul>
+                    <ul class="navbar-nav me-auto">
+                        @auth
+                            @if (Auth::user()->role === \App\Enums\UserRole::Admin)
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin') }}">Admin</a></li>
+                            @elseif (Auth::user()->role === \App\Enums\UserRole::Pelanggan)
+                                <li class="nav-item"><a class="nav-link" href="{{ route('booking-saya') }}">Booking Saya</a></li>
+                            @endif
+                        @endauth
+                    </ul>
                     <ul class="navbar-nav ms-auto">
                         @guest
                             @if (Route::has('login'))
@@ -51,6 +59,18 @@
                 </div>
             </div>
         </nav>
+
+        @auth
+            <aside class="border-bottom bg-light">
+                <div class="container py-2 d-flex gap-3">
+                    @if (Auth::user()->role === \App\Enums\UserRole::Admin)
+                        <a href="{{ route('admin') }}" class="text-decoration-none">Dashboard Admin</a>
+                    @elseif (Auth::user()->role === \App\Enums\UserRole::Pelanggan)
+                        <a href="{{ route('booking-saya') }}" class="text-decoration-none">Booking Saya</a>
+                    @endif
+                </div>
+            </aside>
+        @endauth
 
         <main class="py-4">@yield('content')</main>
     </div>

@@ -12,6 +12,22 @@
                         @csrf
 
                         <div class="row mb-3">
+                            <label for="no_hp" class="col-md-4 col-form-label text-md-end">{{ __('Nomor HP') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="no_hp" type="text" class="form-control @error('no_hp') is-invalid @enderror"
+                                       name="no_hp" value="{{ old('no_hp') }}" required autocomplete="tel"
+                                       placeholder="08xxxxxxxxxx">
+
+                                @error('no_hp')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
 
                             <div class="col-md-6">

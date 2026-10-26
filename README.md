@@ -70,6 +70,45 @@ php artisan tinker
 >>> App\Models\Servis::with(['kendaraan', 'mekanik', 'reservasi'])->get();
 ```
 
+## Auth, Role, dan Pengujian Remember Me
+
+Scaffolding `laravel/ui` yang sudah ada dimodifikasi pada:
+
+- `app/Http/Controllers/Auth/RegisterController.php`: validasi/normalisasi
+  `no_hp` dan pemaksaan role `pelanggan`.
+- `app/Http/Controllers/Auth/LoginController.php`: Remember Me, penolakan
+  akun nonaktif, rate limiting bawaan trait, dan redirect role.
+- `resources/views/222/register.blade.php`: input nomor HP.
+- `bootstrap/app.php`: alias middleware `aktif` dan `role`.
+- `app/Http/Middleware/EnsureUserIsActive.php` dan
+  `app/Http/Middleware/RoleMiddleware.php`.
+- `app/Policies/ReservasiPolicy.php`: pelanggan hanya dapat melihat dan
+  membatalkan reservasinya sendiri.
+- `resources/views/errors/403.blade.php`: halaman khusus akses ditolak.
+
+Tujuh skenario uji Remember Me:
+
+1. Login tanpa mencentang Remember Me: tutup browser, buka lagi, sesi harus
+   berakhir dan pengguna diarahkan ke `/login`.
+2. Login dengan Remember Me: tutup browser, buka lagi, akses `/booking-saya`
+   harus tetap login.
+3. Login dengan checkbox tidak dicentang: pastikan checkbox tidak terpilih
+   pada tampilan awal dan cookie remember tidak dibuat.
+4. Login dengan Remember Me lalu hapus cookie sesi saja: refresh harus tetap
+   terautentikasi melalui cookie remember.
+5. Login dengan Remember Me lalu hapus cookie remember: refresh harus meminta
+   login kembali.
+6. Login dengan password salah berulang kali: throttle harus menolak percobaan
+   setelah batas bawaan `laravel/ui` tercapai.
+7. Login Remember Me, ubah `aktif` menjadi `false` di database, lalu refresh
+   halaman terlindungi: middleware harus logout paksa, menghapus sesi, dan
+   menampilkan pesan akun tidak aktif.
+
+Pembatasan server dan tampilan berbeda: middleware `auth`, `aktif`, `role`, dan
+Policy tetap memblokir request walaupun URL atau request dimanipulasi. `@auth`
+dan pengecekan role di Blade hanya menyembunyikan menu agar UX sesuai role; itu
+bukan pengganti otorisasi server.
+
 ## Struktur Utama
 
 - `routes/web.php`: route publik dan route autentikasi.

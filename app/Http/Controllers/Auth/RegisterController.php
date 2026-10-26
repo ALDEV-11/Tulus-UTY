@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -35,6 +37,13 @@ class RegisterController extends Controller
      */
     protected $redirectTo = '/home';
 
+    public function redirectPath()
+    {
+        return Auth::user()?->role === UserRole::Admin
+            ? '/admin'
+            : '/booking-saya';
+    }
+
     /**
      * Create a new controller instance.
      *
@@ -54,6 +63,15 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
+            'no_hp' => [
+                'required',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($this->normalizePhone($value) === null) {
+                        $fail('Nomor HP harus berformat 08xx, 62xx, atau +62xx.');
+                    }
+                },
+            ],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -68,8 +86,24 @@ class RegisterController extends Controller
     {
         return User::create([
             'name' => $data['name'],
+            'no_hp' => $this->normalizePhone($data['no_hp']),
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'role' => 'pelanggan',
+            'aktif' => true,
         ]);
+    }
+
+    protected function normalizePhone(mixed $value): ?string
+    {
+        $phone = preg_replace('/[\s-]+/', '', trim((string) $value));
+
+        if ($phone === null || str_starts_with($phone, '+62')) {
+            $phone = $phone === null ? '' : '62'.substr($phone, 3);
+        } elseif (str_starts_with($phone, '0')) {
+            $phone = '62'.substr($phone, 1);
+        }
+
+        return preg_match('/^62[0-9]{9,13}$/', $phone) === 1 ? $phone : null;
     }
 }
