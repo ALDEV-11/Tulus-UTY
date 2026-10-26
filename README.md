@@ -65,6 +65,41 @@ Seeder dipisah berdasarkan domain dan dipanggil berurutan oleh
 `SlotWaktuSeeder`, `KendaraanSeeder`, `ReservasiSeeder`, `ServisSeeder`, dan
 `WhatsappLogSeeder`.
 
+## Data Master Admin
+
+Data master hanya dapat diakses melalui middleware `auth` dan `role:admin`.
+Resource CRUD Merk Motor menjadi pola dasar: `MerkMotorRequest` memvalidasi
+input, `MerkMotorController` menjalankan operasi, dan view Blade berada di
+`resources/views/admin/merk-motor`. Merk yang sudah dipakai kendaraan tidak
+dihapus; aksi hapus otomatis mengubahnya menjadi nonaktif.
+
+Layanan dikelola di `resources/views/admin/layanan` dengan nama, deskripsi,
+durasi, interval hari/km, dan status aktif. Tidak ada field harga.
+
+Slot waktu memiliki form pembuatan massal berdasarkan rentang tanggal, jam
+operasional, durasi per slot, dan kapasitas. Slot yang memiliki reservasi aktif
+ditolak saat dihapus. Kapasitas dan status slot tetap dapat diedit.
+
+Daftar pelanggan mendukung pencarian nama/email/nomor HP, aktivasi/nonaktivasi,
+dan reset password. Reset password mengganti password acak serta
+`remember_token`, sehingga cookie Remember Me lama langsung tidak berlaku.
+
+Alur contoh CRUD Merk Motor:
+
+1. Admin membuka menu **Merk Motor** pada sidebar.
+2. Tombol **Tambah Merk** membuka `GET /admin/merk-motor/create`.
+3. Form dikirim ke `POST /admin/merk-motor`.
+4. `MerkMotorRequest` memeriksa role admin, nama wajib, dan keunikannya.
+5. Controller menyimpan data melalui `MerkMotor::create()`.
+6. Controller redirect ke index dengan flash message.
+7. Untuk edit, alurnya memakai `GET .../{merk_motor}/edit` lalu `PUT`.
+8. Untuk hapus, controller memeriksa relasi `kendaraan`; bila ada, hanya
+   `aktif` yang diubah menjadi `false`.
+
+Semua halaman admin memakai `resources/views/layouts/admin.blade.php` dan
+aset statis dashboard di `public/dist-dashboard`, sehingga mengikuti aturan
+tampilan halaman yang sama.
+
 Verifikasi relasi melalui Tinker:
 
 ```bash

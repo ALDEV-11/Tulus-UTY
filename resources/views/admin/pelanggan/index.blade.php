@@ -1,0 +1,8 @@
+@extends('layouts.admin')
+@section('title', 'Pelanggan')
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-4"><h4>Daftar Pelanggan</h4><form method="GET" action="{{ route('admin.pelanggan.index') }}" class="d-flex gap-2"><input name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari nama, email, no. HP"><button class="btn btn-outline-primary">Cari</button></form></div>
+<div class="card"><div class="table-responsive"><table class="table"><thead><tr><th>Nama</th><th>Email</th><th>No. HP</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+@forelse($pelanggans as $pelanggan)<tr><td>{{ $pelanggan->name }}</td><td>{{ $pelanggan->email }}</td><td>{{ $pelanggan->no_hp }}</td><td><span class="badge bg-label-{{ $pelanggan->aktif ? 'success' : 'secondary' }}">{{ $pelanggan->aktif ? 'Aktif' : 'Nonaktif' }}</span></td><td><form class="d-inline" method="POST" action="{{ route('admin.pelanggan.toggle', $pelanggan) }}">@csrf @method('PATCH')<button class="btn btn-sm btn-outline-{{ $pelanggan->aktif ? 'warning' : 'success' }}">{{ $pelanggan->aktif ? 'Nonaktifkan' : 'Aktifkan' }}</button></form> <form class="d-inline" method="POST" action="{{ route('admin.pelanggan.reset-password', $pelanggan) }}">@csrf @method('PATCH')<button class="btn btn-sm btn-outline-danger" onclick="return confirm('Reset password pelanggan ini?')">Reset Password</button></form></td></tr>@empty<tr><td colspan="5" class="text-center">Belum ada pelanggan.</td></tr>@endforelse
+</tbody></table></div><div class="card-footer">{{ $pelanggans->links() }}</div></div>
+@endsection

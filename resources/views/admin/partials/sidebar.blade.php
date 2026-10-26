@@ -65,6 +65,12 @@
           <div class="menu-inner-shadow"></div>
 
           <ul class="menu-inner py-1">
+            <li class="menu-item"><a href="{{ route('admin') }}" class="menu-link"><i class="menu-icon tf-icons bx bx-home-smile"></i><div class="text-truncate">Dashboard</div></a></li>
+            <li class="menu-header small text-uppercase"><span class="menu-header-text">Data Master</span></li>
+            <li class="menu-item"><a href="{{ route('admin.merk-motor.index') }}" class="menu-link"><i class="menu-icon tf-icons bx bx-badge"></i><div class="text-truncate">Merk Motor</div></a></li>
+            <li class="menu-item"><a href="{{ route('admin.layanan.index') }}" class="menu-link"><i class="menu-icon tf-icons bx bx-wrench"></i><div class="text-truncate">Layanan</div></a></li>
+            <li class="menu-item"><a href="{{ route('admin.slot-waktu.index') }}" class="menu-link"><i class="menu-icon tf-icons bx bx-calendar"></i><div class="text-truncate">Slot Waktu</div></a></li>
+            <li class="menu-item"><a href="{{ route('admin.pelanggan.index') }}" class="menu-link"><i class="menu-icon tf-icons bx bx-group"></i><div class="text-truncate">Pelanggan</div></a></li>
             <!-- Dashboards -->
             <li class="menu-item active open">
               <a href="javascript:void(0);" class="menu-link menu-toggle">

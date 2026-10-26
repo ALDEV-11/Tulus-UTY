@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('nama', 150);
             $table->text('deskripsi')->nullable();
             $table->unsignedInteger('durasi_menit')->default(60);
+            $table->unsignedInteger('interval_servis_hari')->nullable();
             $table->unsignedInteger('interval_servis_km')->nullable();
             $table->boolean('aktif')->default(true)->index();
             $table->timestamps();
