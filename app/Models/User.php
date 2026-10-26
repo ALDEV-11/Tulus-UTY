@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -19,8 +20,11 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'no_hp',
         'email',
         'password',
+        'role',
+        'aktif',
     ];
 
     /**
@@ -43,6 +47,28 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => UserRole::class,
+            'aktif' => 'boolean',
         ];
+    }
+
+    public function kendaraan()
+    {
+        return $this->hasMany(Kendaraan::class);
+    }
+
+    public function reservasi()
+    {
+        return $this->hasMany(Reservasi::class);
+    }
+
+    public function servisSebagaiMekanik()
+    {
+        return $this->hasMany(Servis::class, 'mekanik_id');
+    }
+
+    public function whatsappLogs()
+    {
+        return $this->hasMany(WhatsappLog::class);
     }
 }

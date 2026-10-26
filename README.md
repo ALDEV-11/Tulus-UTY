@@ -40,6 +40,36 @@ Template dashboard di `public/dist-dashboard` dipakai langsung melalui helper `a
 Vite tidak diperlukan untuk halaman auth/dashboard ini dan Bootstrap tidak dikompilasi ulang.
 Chart.js disiapkan melalui CDN di layout utama dan dapat dipakai pada fase dashboard.
 
+## Database Bengkel
+
+Database fase 2 memakai sembilan tabel: `users`, `merk_motor`, `layanan`,
+`slot_waktu`, `kendaraan`, `reservasi`, `reservasi_layanan`, `servis`, dan
+`whatsapp_logs`. Tabel `reservasi_layanan` adalah pivot reservasi-layanan.
+Foreign key dibuat berurutan dan `slot_waktu` memiliki unique gabungan
+`tanggal` + `jam_mulai`. Status reservasi default adalah
+`menunggu_konfirmasi`.
+
+Seeder menyediakan akun demo berikut (keduanya memakai password `password`):
+
+- Admin: `admin@aldi-motor.test`
+- Pelanggan: `pelanggan@aldi-motor.test`
+
+Bangun ulang database dan jalankan seluruh seed dengan:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Verifikasi relasi melalui Tinker:
+
+```bash
+php artisan tinker
+>>> $u = App\Models\User::where('email', 'pelanggan@aldi-motor.test')->first();
+>>> $u->kendaraan()->with('merk')->get();
+>>> $u->reservasi()->with(['slot', 'kendaraan.merk', 'layanan'])->get();
+>>> App\Models\Servis::with(['kendaraan', 'mekanik', 'reservasi'])->get();
+```
+
 ## Struktur Utama
 
 - `routes/web.php`: route publik dan route autentikasi.
