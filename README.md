@@ -60,6 +60,11 @@ Bangun ulang database dan jalankan seluruh seed dengan:
 php artisan migrate:fresh --seed
 ```
 
+Seeder dipisah berdasarkan domain dan dipanggil berurutan oleh
+`DatabaseSeeder`: `UserSeeder`, `MerkMotorSeeder`, `LayananSeeder`,
+`SlotWaktuSeeder`, `KendaraanSeeder`, `ReservasiSeeder`, `ServisSeeder`, dan
+`WhatsappLogSeeder`.
+
 Verifikasi relasi melalui Tinker:
 
 ```bash
