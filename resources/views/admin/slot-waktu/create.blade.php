@@ -1,7 +1,6 @@
-@extends('layouts.admin')
-@section('title', 'Buat Slot Massal')
-@section('content')
+@php($pageTitle = 'Buat Slot Massal')
+@include('admin.partials.page-head')
 <div class="card"><div class="card-header"><h5>Buat Slot Waktu Massal</h5></div><div class="card-body"><form method="POST" action="{{ route('admin.slot-waktu.store') }}">@csrf
 <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Tanggal mulai</label><input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" class="form-control" required></div><div class="col-md-6 mb-3"><label class="form-label">Tanggal selesai</label><input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" class="form-control" required></div><div class="col-md-3 mb-3"><label class="form-label">Jam mulai</label><input type="time" name="jam_mulai" value="{{ old('jam_mulai', '08:00') }}" class="form-control" required></div><div class="col-md-3 mb-3"><label class="form-label">Jam selesai</label><input type="time" name="jam_selesai" value="{{ old('jam_selesai', '16:00') }}" class="form-control" required></div><div class="col-md-3 mb-3"><label class="form-label">Durasi slot (menit)</label><input type="number" name="durasi_slot" value="{{ old('durasi_slot', 120) }}" class="form-control" min="1" required></div><div class="col-md-3 mb-3"><label class="form-label">Kapasitas</label><input type="number" name="kapasitas" value="{{ old('kapasitas', 2) }}" class="form-control" min="1" required></div></div>
 <button class="btn btn-primary">Buat Slot</button> <a class="btn btn-outline-secondary" href="{{ route('admin.slot-waktu.index') }}">Batal</a></form></div></div>
-@endsection
+@include('admin.partials.page-foot')
