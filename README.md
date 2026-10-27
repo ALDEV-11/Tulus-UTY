@@ -1,88 +1,107 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ALDI MOTOR
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi manajemen bengkel motor berbasis Laravel 12. Mencakup autentikasi role
+admin/pelanggan, data master bengkel, slot waktu, reservasi, servis, dan log WhatsApp.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+ (diuji pada PHP 8.5) dan Laravel 12.
+- MySQL dengan database `aldi-motor`, zona waktu `Asia/Jakarta`, locale aplikasi `id`.
+- `laravel/ui` 4.6 (Bootstrap) untuk autentikasi.
+- Template dashboard statis di `public/dist-dashboard`, dimuat langsung melalui helper
+  `asset()`.
+- Vite/Tailwind tersedia di `package.json`, tetapi halaman auth dan dashboard tidak
+  bergantung pada build Vite.
 
 ## Setup Lokal
 
-1. Buat database MySQL `aldi-motor` di Laragon/XAMPP, lalu sesuaikan `DB_*` di `.env`.
+1. Buat database MySQL `aldi-motor`, lalu sesuaikan `DB_*` di `.env`.
 2. Gunakan `APP_URL=http://localhost/Tulus-UTY/public` jika project diakses melalui
    document root Apache seperti struktur ini.
 3. Jalankan `composer install`, `php artisan key:generate`, dan `php artisan migrate`.
 4. Jalankan `php artisan serve` atau buka URL Apache di atas.
 
-Aplikasi menggunakan zona waktu `Asia/Jakarta`, locale aplikasi `id`, dan locale Carbon
-Indonesia. Autentikasi Blade dibuat dengan `laravel/ui` 4.6.3 (`php artisan ui bootstrap
---auth`), termasuk Register, Login, Logout, reset password, dan checkbox Remember Me.
-`laravel/ui` dipilih daripada auth manual karena controller, validasi, middleware, session,
-dan route standar sudah teruji; auth manual hanya tepat bila alur autentikasi sangat
-berbeda atau ingin menghindari dependency tambahan.
-
-Template dashboard di `public/dist-dashboard` dipakai langsung melalui helper `asset()`.
-Vite tidak diperlukan untuk halaman auth/dashboard ini dan Bootstrap tidak dikompilasi ulang.
-Chart.js disiapkan melalui CDN di layout utama dan dapat dipakai pada fase dashboard.
-
-## Database Bengkel
-
-Database fase 2 memakai sembilan tabel: `users`, `merk_motor`, `layanan`,
-`slot_waktu`, `kendaraan`, `reservasi`, `reservasi_layanan`, `servis`, dan
-`whatsapp_logs`. Tabel `reservasi_layanan` adalah pivot reservasi-layanan.
-Foreign key dibuat berurutan dan `slot_waktu` memiliki unique gabungan
-`tanggal` + `jam_mulai`. Status reservasi default adalah
-`menunggu_konfirmasi`.
-
-Seeder menyediakan akun demo berikut (keduanya memakai password `password`):
-
-- Admin: `admin@aldi-motor.test`
-- Pelanggan: `pelanggan@aldi-motor.test`
-
-Bangun ulang database dan jalankan seluruh seed dengan:
+Bangun ulang database beserta seluruh data demo dengan:
 
 ```bash
 php artisan migrate:fresh --seed
 ```
 
-Seeder dipisah berdasarkan domain dan dipanggil berurutan oleh
-`DatabaseSeeder`: `UserSeeder`, `MerkMotorSeeder`, `LayananSeeder`,
-`SlotWaktuSeeder`, `KendaraanSeeder`, `ReservasiSeeder`, `ServisSeeder`, dan
-`WhatsappLogSeeder`.
+Seeder dipisah berdasarkan domain dan dipanggil berurutan oleh `DatabaseSeeder`:
+`UserSeeder`, `MerkMotorSeeder`, `LayananSeeder`, `SlotWaktuSeeder`, `KendaraanSeeder`,
+`ReservasiSeeder`, `ServisSeeder`, dan `WhatsappLogSeeder`.
+
+Akun demo berikut memakai password `password`:
+
+- Admin: `admin@aldi-motor.test`
+- Pelanggan: `pelanggan@aldi-motor.test`
+
+## Database Bengkel
+
+Database memakai sembilan tabel: `users`, `merk_motor`, `layanan`, `slot_waktu`,
+`kendaraan`, `reservasi`, `reservasi_layanan`, `servis`, dan `whatsapp_logs`.
+Tabel `reservasi_layanan` adalah pivot reservasi-layanan. Foreign key dibuat berurutan
+dan `slot_waktu` memiliki unique gabungan `tanggal` + `jam_mulai`. Status reservasi
+default adalah `menunggu_konfirmasi`.
+
+## Autentikasi dan Hak Akses
+
+Autentikasi memakai scaffolding `laravel/ui` (`php artisan ui bootstrap --auth`) yang
+disesuaikan pada controller, view, dan middleware. Fitur yang tersedia: register, login,
+logout, reset password, konfirmasi password, dan Remember Me.
+
+Setelah login, admin diarahkan ke `/admin` dan pelanggan ke `/booking-saya`. Route `/home`
+meneruskan pengguna ke dashboard sesuai role.
+
+Pembatasan akses dilakukan berlapis:
+
+- Middleware `auth`, `aktif`, dan `role` (alias didaftarkan di `bootstrap/app.php`).
+- `EnsureUserIsActive` di grup middleware `web` memaksa logout akun nonaktif.
+- `RoleMiddleware` membatasi area admin dan pelanggan.
+- `ReservasiPolicy` membatasi pelanggan hanya pada reservasinya sendiri.
+- `resources/views/errors/403.blade.php` menampilkan halaman akses ditolak.
+
+Pengecekan role di Blade hanya menyembunyikan menu agar UX sesuai role; otorisasi tetap
+dilakukan di server. Request yang dimanipulasi tetap diblokir oleh middleware dan Policy.
+
+View autentikasi berada di `resources/views/222` (nama folder sengaja tidak memakai nama
+standar). Login dan register ditulis sebagai halaman mandiri, sedangkan halaman password
+memakai partial `222/partials/head.blade.php` dan `222/partials/foot.blade.php`.
+
+### Tujuh skenario uji Remember Me
+
+1. Login tanpa mencentang Remember Me: tutup browser, buka lagi, sesi harus berakhir dan
+   pengguna diarahkan ke `/login`.
+2. Login dengan Remember Me: tutup browser, buka lagi, akses `/booking-saya` harus tetap
+   login.
+3. Login dengan checkbox tidak dicentang: pastikan checkbox tidak terpilih pada tampilan
+   awal dan cookie remember tidak dibuat.
+4. Login dengan Remember Me lalu hapus cookie sesi saja: refresh harus tetap terautentikasi
+   melalui cookie remember.
+5. Login dengan Remember Me lalu hapus cookie remember: refresh harus meminta login kembali.
+6. Login dengan password salah berulang kali: throttle harus menolak percobaan setelah
+   batas bawaan `laravel/ui` tercapai.
+7. Login Remember Me, ubah `aktif` menjadi `false` di database, lalu refresh halaman
+   terlindungi: middleware harus logout paksa, menghapus sesi, dan menampilkan pesan akun
+   tidak aktif.
 
 ## Data Master Admin
 
-Data master hanya dapat diakses melalui middleware `auth` dan `role:admin`.
-Resource CRUD Merk Motor menjadi pola dasar: `MerkMotorRequest` memvalidasi
-input, `MerkMotorController` menjalankan operasi, dan view Blade berada di
-`resources/views/admin/merk-motor`. Merk yang sudah dipakai kendaraan tidak
-dihapus; aksi hapus otomatis mengubahnya menjadi nonaktif.
+Data master hanya dapat diakses melalui middleware `auth` dan `role:admin`. Resource CRUD
+Merk Motor menjadi pola dasar: `MerkMotorRequest` memvalidasi input, `MerkMotorController`
+menjalankan operasi, dan view Blade berada di `resources/views/admin/merk-motor`. Merk yang
+sudah dipakai kendaraan tidak dihapus; aksi hapus otomatis mengubahnya menjadi nonaktif.
 
-Layanan dikelola di `resources/views/admin/layanan` dengan nama, deskripsi,
-durasi, interval hari/km, dan status aktif. Tidak ada field harga.
+Layanan dikelola di `resources/views/admin/layanan` dengan nama, deskripsi, durasi,
+interval hari/km, dan status aktif. Tidak ada field harga.
 
-Slot waktu memiliki form pembuatan massal berdasarkan rentang tanggal, jam
-operasional, durasi per slot, dan kapasitas. Slot yang memiliki reservasi aktif
-ditolak saat dihapus. Kapasitas dan status slot tetap dapat diedit.
+Slot waktu memiliki form pembuatan massal berdasarkan rentang tanggal, jam operasional,
+durasi per slot, dan kapasitas. Slot yang memiliki reservasi aktif ditolak saat dihapus.
+Kapasitas dan status slot tetap dapat diedit.
 
-Daftar pelanggan mendukung pencarian nama/email/nomor HP, aktivasi/nonaktivasi,
-dan reset password. Reset password mengganti password acak serta
-`remember_token`, sehingga cookie Remember Me lama langsung tidak berlaku.
+Daftar pelanggan mendukung pencarian nama/email/nomor HP, aktivasi/nonaktivasi, dan reset
+password. Reset password mengganti password acak serta `remember_token`, sehingga cookie
+Remember Me lama langsung tidak berlaku.
 
 Alur contoh CRUD Merk Motor:
 
@@ -93,12 +112,13 @@ Alur contoh CRUD Merk Motor:
 5. Controller menyimpan data melalui `MerkMotor::create()`.
 6. Controller redirect ke index dengan flash message.
 7. Untuk edit, alurnya memakai `GET .../{merk_motor}/edit` lalu `PUT`.
-8. Untuk hapus, controller memeriksa relasi `kendaraan`; bila ada, hanya
-   `aktif` yang diubah menjadi `false`.
+8. Untuk hapus, controller memeriksa relasi `kendaraan`; bila ada, hanya `aktif` yang
+   diubah menjadi `false`.
 
-Semua halaman admin memakai `resources/views/layouts/admin.blade.php` dan
-aset statis dashboard di `public/dist-dashboard`, sehingga mengikuti aturan
-tampilan halaman yang sama.
+Semua halaman admin memakai aset statis dashboard di `public/dist-dashboard`. Halaman
+dashboard dan daftar ditulis mandiri, sedangkan halaman form memakai partial
+`resources/views/admin/partials/page-head.blade.php` dan `page-foot.blade.php`, sehingga
+tampilan tetap konsisten tanpa layout Blade bersama.
 
 Verifikasi relasi melalui Tinker:
 
@@ -110,93 +130,143 @@ php artisan tinker
 >>> App\Models\Servis::with(['kendaraan', 'mekanik', 'reservasi'])->get();
 ```
 
-## Auth, Role, dan Pengujian Remember Me
+## Cek Slot Publik, Kendaraan, dan Booking Saya
 
-Scaffolding `laravel/ui` yang sudah ada dimodifikasi pada:
+Halaman publik `GET /cek-slot?tanggal=YYYY-MM-DD` dapat dibuka tanpa login. Setiap slot
+menampilkan jam, kapasitas, jumlah terpakai, sisa, dan status:
 
-- `app/Http/Controllers/Auth/RegisterController.php`: validasi/normalisasi
-  `no_hp` dan pemaksaan role `pelanggan`.
-- `app/Http/Controllers/Auth/LoginController.php`: Remember Me, penolakan
-  akun nonaktif, rate limiting bawaan trait, dan redirect role.
-- `resources/views/222/register.blade.php`: input nomor HP.
-- `bootstrap/app.php`: alias middleware `aktif` dan `role`.
-- `app/Http/Middleware/EnsureUserIsActive.php` dan
-  `app/Http/Middleware/RoleMiddleware.php`.
-- `app/Policies/ReservasiPolicy.php`: pelanggan hanya dapat melihat dan
-  membatalkan reservasinya sendiri.
-- `resources/views/errors/403.blade.php`: halaman khusus akses ditolak.
+- `tersedia` (hijau)
+- `hampir penuh` (kuning) bila sisa > 0 dan sisa <= setengah kapasitas
+- `penuh` (merah) bila sisa 0
 
-Tujuh skenario uji Remember Me:
+Reservasi yang dihitung sebagai pemakai kapasitas adalah `menunggu_konfirmasi`,
+`dikonfirmasi`, dan `check_in`. Status `selesai` dan `dibatalkan` tidak dihitung. Slot
+yang penuh atau sudah lewat tidak dapat dipilih. Perhitungan dipusatkan di
+`App\Services\SlotAvailabilityService`. Pelanggan yang sudah login membuka halaman yang
+sama di dalam layout customer sehingga sidebar tetap tersedia; tamu memakai halaman
+publik tanpa sidebar.
 
-1. Login tanpa mencentang Remember Me: tutup browser, buka lagi, sesi harus
-   berakhir dan pengguna diarahkan ke `/login`.
-2. Login dengan Remember Me: tutup browser, buka lagi, akses `/booking-saya`
-   harus tetap login.
-3. Login dengan checkbox tidak dicentang: pastikan checkbox tidak terpilih
-   pada tampilan awal dan cookie remember tidak dibuat.
-4. Login dengan Remember Me lalu hapus cookie sesi saja: refresh harus tetap
-   terautentikasi melalui cookie remember.
-5. Login dengan Remember Me lalu hapus cookie remember: refresh harus meminta
-   login kembali.
-6. Login dengan password salah berulang kali: throttle harus menolak percobaan
-   setelah batas bawaan `laravel/ui` tercapai.
-7. Login Remember Me, ubah `aktif` menjadi `false` di database, lalu refresh
-   halaman terlindungi: middleware harus logout paksa, menghapus sesi, dan
-   menampilkan pesan akun tidak aktif.
+Pelanggan mengelola kendaraan di `/kendaraan` (index, tambah, edit, hapus). Nomor polisi
+dinormalisasi menjadi huruf besar dan spasi tunggal sebelum validasi keunikan. Policy
+`KendaraanPolicy` membatasi perubahan hanya untuk pemilik. Kendaraan yang sudah memiliki
+riwayat reservasi atau servis tidak dapat dihapus.
 
-Pembatasan server dan tampilan berbeda: middleware `auth`, `aktif`, `role`, dan
-Policy tetap memblokir request walaupun URL atau request dimanipulasi. `@auth`
-dan pengecekan role di Blade hanya menyembunyikan menu agar UX sesuai role; itu
-bukan pengganti otorisasi server.
+Form **Buat Reservasi** di `/booking-saya` memilih kendaraan yang sudah ada atau
+menambahkan kendaraan baru langsung di modal, memilih slot, layanan, dan mengisi keluhan.
+Layanan tidak memiliki harga; form menampilkan “Biaya menyesuaikan merk dan kondisi motor,
+dikonfirmasi bengkel”. Reservasi disimpan dalam `DB::transaction()` dengan
+`lockForUpdate()` pada baris slot, lalu dicek kapasitasnya. Status awal adalah
+`menunggu_konfirmasi` dan kode booking memakai kolom `reservasi.kode`.
+
+Pelanggan yang memilih slot dari halaman publik diarahkan ke login. Setelah login,
+`redirect()->intended()` mengembalikan mereka ke `/booking-saya?slot=...` dengan modal dan
+slot terpilih. Halaman **Booking Saya** menampilkan daftar reservasi, detail terpisah,
+alasan penolakan, dan tombol pembatalan untuk status `menunggu_konfirmasi` atau
+`dikonfirmasi`. Dashboard customer juga menampilkan ringkasan reservasi aktif, servis
+selesai, jumlah kendaraan, total biaya servis, lima servis terakhir, slot terdekat, dan
+kartu kendaraan. Semua angka diambil dari tabel `reservasi`, `servis`, `kendaraan`, dan
+`slot_waktu`; tidak ada lagi kartu demo template. Scrollbar sidebar customer
+disembunyikan tanpa menghilangkan kemampuan menu untuk digulir di layar pendek.
+
+Pengujian FASE 7:
+
+```bash
+php artisan test --filter=PublicSlotTest
+php artisan test --filter=KendaraanTest
+php artisan test --filter=SlotConcurrencyTest
+php artisan test --filter=ReservationFlowTest
+```
+
+`SlotConcurrencyTest` menguji dua pelanggan yang memperebutkan slot terakhir secara
+berurutan dan memastikan query `lockForUpdate()` benar-benar dijalankan. Uji paralel
+sungguhan dengan dua koneksi database belum disertakan.
+
+## Reservasi, Notifikasi Real-Time, dan Log WhatsApp
+
+Pelanggan membuat reservasi dari modal **Buat Reservasi** di `/booking-saya`. Form memilih
+kendaraan, slot yang masih tersedia, layanan, dan keluhan. Slot dikunci saat transaksi
+dibuat agar dua pelanggan tidak mengambil kapasitas terakhir bersamaan. Reservasi baru
+berstatus `menunggu_konfirmasi` dan dapat dibatalkan pelanggan selama berstatus
+`menunggu_konfirmasi` atau `dikonfirmasi`.
+
+Admin mengelola reservasi di `/admin/reservasi`: pencarian kode/nama/nomor HP/plat nomor,
+filter status dan rentang tanggal, detail reservasi, konfirmasi, penolakan/pembatalan,
+serta penyelesaian servis. Setiap aksi juga membuat log WhatsApp.
+
+Reservasi berstatus `menunggu_konfirmasi` yang dibatalkan admin dianggap **penolakan**:
+alasan wajib diisi, reservasi menjadi `dibatalkan`, dan log `penolakan_reservasi` dibuat.
+Pembatalan reservasi yang sudah `dikonfirmasi` memakai alasan opsional dan log
+`pembatalan_reservasi`.
+
+Setelah kendaraan selesai dikerjakan, admin membuka detail reservasi berstatus
+`dikonfirmasi` lalu mengisi form **Selesaikan Servis** (tanggal selesai, mekanik,
+diagnosa, tindakan, dan total biaya). Aksi ini membuat atau memperbarui record `servis`
+menjadi `selesai`, mengubah reservasi menjadi `selesai`, dan mencatat log WhatsApp
+`servis_selesai`. Slot otomatis tersedia lagi karena status `selesai` tidak dihitung
+sebagai reservasi aktif.
+
+### Kirim WhatsApp semi-otomatis
+
+Di modal detail reservasi, tombol **Kirim WA** muncul sesuai kondisi:
+
+| Tombol | Muncul saat |
+| --- | --- |
+| Kirim WA Konfirmasi | reservasi `dikonfirmasi` |
+| Kirim WA Penolakan | reservasi `dibatalkan` karena ditolak admin |
+| Kirim WA Servis Selesai | reservasi `selesai` dan `servis.status = selesai` |
+| Kirim WA Pengingat | reservasi `selesai` dan `servis.status = selesai` |
+
+Saat tombol ditekan, browser mengirim POST ke
+`POST /admin/reservasi/{reservasi}/kirim-wa` di tab baru. Controller mencatat log
+(`jenis`, `reservasi_id`, `nomor_tujuan`, `pesan`, status `menunggu`), lalu redirect ke
+`https://wa.me/{nomor}?text={pesan}`. Pendekatan form POST + `target="_blank"` dipilih
+karena tidak terkena popup blocker seperti `window.open()` setelah `fetch()`.
+
+Nomor HP dinormalisasi oleh `App\Support\WhatsappLink`: `08...`, `8...`, `62...`, dan
+`+62...` menjadi `62...`. Nomor kosong atau tidak valid tidak menghasilkan log dan
+menampilkan pesan error; tombol Kirim WA tidak ditampilkan.
+
+Template yang dipakai: konfirmasi (kode + jadwal), penolakan (alasan + ajakan memilih
+jadwal lain), servis selesai (nopol + silakan diambil), dan pengingat servis berkala
+(layanan + nopol). Template servis selesai tidak memuat biaya.
+
+Notifikasi real-time memakai Pusher dan event `App\Events\ReservationCreated` pada channel
+privat `admin.reservations`. Untuk mengaktifkannya:
+
+1. Isi `PUSHER_APP_ID`, `PUSHER_APP_KEY`, `PUSHER_APP_SECRET`, dan `PUSHER_APP_CLUSTER`
+   di `.env`.
+2. Ubah `BROADCAST_CONNECTION=pusher`.
+3. Jalankan `php artisan config:clear`, lalu muat ulang `/admin/reservasi`.
+
+Selama kredensial Pusher belum diisi, halaman admin memakai polling
+`GET /admin/reservasi/notifikasi` setiap 30 detik. Otorisasi channel privat berada di
+`routes/channels.php` dan endpoint auth didaftarkan melalui `bootstrap/app.php`.
+
+Log WhatsApp dibuat otomatis untuk reservasi baru, konfirmasi, penolakan, pembatalan, dan
+servis selesai. Setiap klik **Kirim WA** menambah satu baris log baru. Karena gateway
+WhatsApp belum terhubung, status log tetap `menunggu` (bukan klaim `terkirim`). Log dapat
+dilihat pada detail reservasi atau halaman `/admin/whatsapp-log`, yang mendukung filter
+jenis, status, pencarian, dan rentang tanggal (`dari`/`sampai` berdasarkan `created_at`).
+
+Pengujian alur reservasi:
+
+```bash
+php artisan test --filter=ReservationFlowTest
+php artisan test --filter=WhatsappLinkTest
+```
 
 ## Struktur Utama
 
-- `routes/web.php`: route publik dan route autentikasi.
+- `routes/web.php`: route publik, autentikasi, admin, dan reservasi.
 - `app/Http/Controllers`: controller aplikasi dan controller auth.
-- `app/Models`: model Eloquent seperti `User`.
-- `resources/views`: template Blade, termasuk `layouts`, `auth`, dan halaman aplikasi.
-- `public`: document root dan aset statis dashboard.
+- `app/Http/Middleware` dan `app/Policies`: pembatasan akses role dan reservasi.
+- `app/Models` dan `app/Enums`: model Eloquent dan enum domain bengkel.
+- `resources/views/222`: halaman autentikasi (nama folder sengaja disamarkan).
+- `resources/views/admin` dan `resources/views/customer`: halaman mandiri beserta partial.
+- `resources/views/errors`: halaman error, termasuk `403`.
+- `public`: document root dan aset statis dashboard di `dist-dashboard`.
+- `database/migrations` dan `database/seeders`: skema dan data demo per domain.
 
-## Learning Laravel
+## Lisensi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Dirilis di bawah [MIT license](https://opensource.org/licenses/MIT).

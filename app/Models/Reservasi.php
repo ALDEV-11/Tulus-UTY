@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StatusReservasi;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Reservasi extends Model
@@ -17,4 +18,26 @@ class Reservasi extends Model
     public function layanan() { return $this->belongsToMany(Layanan::class, 'reservasi_layanan')->withPivot('jumlah')->withTimestamps(); }
     public function servis() { return $this->hasOne(Servis::class); }
     public function whatsappLogs() { return $this->hasMany(WhatsappLog::class); }
+
+    public function scopeAktif(Builder $query): Builder
+    {
+        return $query->whereIn('status', [
+            StatusReservasi::MenungguKonfirmasi->value,
+            StatusReservasi::Dikonfirmasi->value,
+            StatusReservasi::CheckIn->value,
+        ]);
+    }
+
+    public function alasanPenolakan(): ?string
+    {
+        if ($this->status !== StatusReservasi::Dibatalkan) {
+            return null;
+        }
+
+        if (preg_match('/Ditolak admin:\s*(.+)/is', (string) $this->catatan, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return null;
+    }
 }

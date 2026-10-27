@@ -12,7 +12,10 @@ class MerkMotorController extends Controller
 {
     public function index(): View
     {
-        return view('admin.merk-motor.index', ['merks' => MerkMotor::latest()->paginate(15)]);
+        return view('admin.merk-motor.index', [
+            'merks' => MerkMotor::withCount('kendaraan')->latest()->paginate(5),
+            'merkBaru' => new MerkMotor(['aktif' => true]),
+        ]);
     }
 
     public function create(): View

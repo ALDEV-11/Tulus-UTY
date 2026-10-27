@@ -1,6 +1,41 @@
-@php($pageTitle = 'Edit Slot Waktu')
+@php
+    $pageTitle = 'Edit Slot Waktu';
+@endphp
 @include('admin.partials.page-head')
-<div class="card"><div class="card-header"><h5>Edit Slot {{ $slot->tanggal->format('d/m/Y') }}</h5></div><div class="card-body"><form method="POST" action="{{ route('admin.slot-waktu.update', $slot) }}">@csrf @method('PUT')
-<div class="mb-3"><label class="form-label">Kapasitas</label><input type="number" name="kapasitas" value="{{ old('kapasitas', $slot->kapasitas) }}" class="form-control" min="1" required></div><div class="form-check mb-3"><input type="hidden" name="aktif" value="0"><input type="checkbox" name="aktif" value="1" class="form-check-input" id="aktif" @checked(old('aktif', $slot->aktif))><label class="form-check-label" for="aktif">Aktif</label></div>
-<button class="btn btn-primary">Simpan</button> <a class="btn btn-outline-secondary" href="{{ route('admin.slot-waktu.index') }}">Batal</a></form></div></div>
+
+@include('admin.partials.form-header', [
+    'title' => 'Edit Slot Waktu',
+    'subtitle' => $slot->tanggal->translatedFormat('l, d F Y').' pukul '.substr($slot->jam_mulai, 0, 5).' - '.substr($slot->jam_selesai, 0, 5).'.',
+    'parentTitle' => 'Slot Waktu',
+    'currentTitle' => 'Edit',
+    'backRoute' => route('admin.slot-waktu.index'),
+])
+
+<div class="row">
+    <div class="col-12 col-xl-7 col-lg-9">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-3 py-4">
+                <div class="avatar flex-shrink-0">
+                    <span class="avatar-initial rounded-circle bg-label-warning">
+                        <i class="icon-base bx bx-calendar-edit" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div>
+                    <h5 class="mb-0">{{ $slot->tanggal->translatedFormat('d M Y') }}</h5>
+                    <small class="text-body-secondary">
+                        <i class="icon-base bx bx-time me-1" aria-hidden="true"></i>
+                        {{ substr($slot->jam_mulai, 0, 5) }} – {{ substr($slot->jam_selesai, 0, 5) }}
+                        &bull; Kapasitas {{ $slot->kapasitas }} &bull; Terisi {{ $slot->reservasi_aktif_count }}
+                    </small>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <form method="POST" action="{{ route('admin.slot-waktu.update', $slot) }}" id="form-edit-slot">
+                    @include('admin.slot-waktu._edit-form', ['slot' => $slot])
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @include('admin.partials.page-foot')

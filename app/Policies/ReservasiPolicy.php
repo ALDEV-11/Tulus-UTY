@@ -16,6 +16,6 @@ class ReservasiPolicy
     public function cancel(User $user, Reservasi $reservasi): bool
     {
         return $this->view($user, $reservasi)
-            && $reservasi->status->value === 'menunggu_konfirmasi';
+            && in_array($reservasi->status->value, ['menunggu_konfirmasi', 'dikonfirmasi'], true);
     }
 }

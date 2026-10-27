@@ -1,28 +1,25 @@
-@extends('layouts.app')
+@include('222.partials.head', ['pageTitle' => 'Verifikasi Email'])
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Verify Your Email Address') }}</div>
+<h4 class="mb-1">Verifikasi Email Anda</h4>
 
-                <div class="card-body">
-                    @if (session('resent'))
-                        <div class="alert alert-success" role="alert">
-                            {{ __('A fresh verification link has been sent to your email address.') }}
-                        </div>
-                    @endif
-
-                    {{ __('Before proceeding, please check your email for a verification link.') }}
-                    {{ __('If you did not receive the email') }},
-                    <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-link p-0 m-0 align-baseline">{{ __('click here to request another') }}</button>.
-                    </form>
-                </div>
-            </div>
-        </div>
+@if (session('resent'))
+    <div class="alert alert-success" role="alert">
+        Tautan verifikasi baru telah dikirim ke alamat email Anda.
     </div>
-</div>
-@endsection
+@endif
+
+<p class="mb-6">Sebelum melanjutkan, periksa email Anda untuk tautan verifikasi.</p>
+
+<p class="mb-0">
+    Jika Anda tidak menerima email,
+    @if (Route::has('verification.resend'))
+        <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
+            @csrf
+            <button type="submit" class="btn btn-link p-0 m-0 align-baseline">klik di sini untuk meminta tautan baru</button>.
+        </form>
+    @else
+        silakan hubungi administrator.
+    @endif
+</p>
+
+@include('222.partials.foot')

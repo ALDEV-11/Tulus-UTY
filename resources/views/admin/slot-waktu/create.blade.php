@@ -1,6 +1,37 @@
-@php($pageTitle = 'Buat Slot Massal')
+@php
+    $pageTitle = 'Buat Slot Massal';
+@endphp
 @include('admin.partials.page-head')
-<div class="card"><div class="card-header"><h5>Buat Slot Waktu Massal</h5></div><div class="card-body"><form method="POST" action="{{ route('admin.slot-waktu.store') }}">@csrf
-<div class="row"><div class="col-md-6 mb-3"><label class="form-label">Tanggal mulai</label><input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" class="form-control" required></div><div class="col-md-6 mb-3"><label class="form-label">Tanggal selesai</label><input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" class="form-control" required></div><div class="col-md-3 mb-3"><label class="form-label">Jam mulai</label><input type="time" name="jam_mulai" value="{{ old('jam_mulai', '08:00') }}" class="form-control" required></div><div class="col-md-3 mb-3"><label class="form-label">Jam selesai</label><input type="time" name="jam_selesai" value="{{ old('jam_selesai', '16:00') }}" class="form-control" required></div><div class="col-md-3 mb-3"><label class="form-label">Durasi slot (menit)</label><input type="number" name="durasi_slot" value="{{ old('durasi_slot', 120) }}" class="form-control" min="1" required></div><div class="col-md-3 mb-3"><label class="form-label">Kapasitas</label><input type="number" name="kapasitas" value="{{ old('kapasitas', 2) }}" class="form-control" min="1" required></div></div>
-<button class="btn btn-primary">Buat Slot</button> <a class="btn btn-outline-secondary" href="{{ route('admin.slot-waktu.index') }}">Batal</a></form></div></div>
+
+@include('admin.partials.form-header', [
+    'title' => 'Buat Slot Massal',
+    'subtitle' => 'Buat beberapa slot sekaligus untuk rentang tanggal dan jam operasional.',
+    'parentTitle' => 'Slot Waktu',
+    'currentTitle' => 'Buat Massal',
+    'backRoute' => route('admin.slot-waktu.index'),
+])
+
+<div class="row">
+    <div class="col-12 col-xl-8">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-3 py-4">
+                <div class="avatar flex-shrink-0">
+                    <span class="avatar-initial rounded-circle bg-label-warning">
+                        <i class="icon-base bx bx-calendar-plus" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div>
+                    <h5 class="mb-0">Pembuatan Slot Massal</h5>
+                    <small class="text-body-secondary">Slot akan dibuat otomatis untuk setiap hari dalam rentang</small>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <form method="POST" action="{{ route('admin.slot-waktu.store') }}" id="form-buat-slot">
+                    @include('admin.slot-waktu._mass-form')
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @include('admin.partials.page-foot')

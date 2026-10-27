@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Enums\UserRole;
 
 class HomeController extends Controller
 {
@@ -17,12 +17,14 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the application dashboard.
+     * Send each user to the dashboard that matches their role.
      *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function index()
     {
-        return view('home');
+        return auth()->user()?->role === UserRole::Admin
+            ? redirect()->route('admin')
+            : redirect()->route('booking-saya');
     }
 }

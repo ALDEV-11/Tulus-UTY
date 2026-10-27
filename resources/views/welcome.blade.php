@@ -722,7 +722,7 @@
                     <div class="d-flex align-items-start row">
                       <div class="col-sm-7">
                         <div class="card-body">
-                          <h5 class="card-title text-primary mb-3">Congratulations John! 🎉</h5>
+                          <h5 class="card-title text-primary mb-3">Congratulations John!</h5>
                           <p class="mb-6">
                             You have done 72% more sales today.<br />Check your new badge in your profile.
                           </p>
@@ -1293,7 +1293,7 @@
                     <script>
                       document.write(new Date().getFullYear());
                     </script>
-                    , made with ❤️ by
+                    , made by
                     <a href="https://themeselection.com" target="_blank" class="footer-link">ThemeSelection</a>
                   </div>
                   <div class="d-none d-lg-inline-block">

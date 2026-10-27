@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->appendToGroup('web', EnsureUserIsActive::class);
     })
+    ->withBroadcasting(__DIR__.'/../routes/channels.php', [
+        'middleware' => ['web'],
+    ])
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

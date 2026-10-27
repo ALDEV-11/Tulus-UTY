@@ -10,7 +10,13 @@ use Illuminate\View\View;
 
 class LayananController extends Controller
 {
-    public function index(): View { return view('admin.layanan.index', ['layanans' => Layanan::latest()->paginate(15)]); }
+    public function index(): View
+    {
+        return view('admin.layanan.index', [
+            'layanans' => Layanan::withCount('reservasi')->latest()->paginate(5),
+            'layananBaru' => new Layanan(['aktif' => true]),
+        ]);
+    }
     public function create(): View { return view('admin.layanan.create', ['layanan' => new Layanan(['aktif' => true])]); }
     public function store(LayananRequest $request): RedirectResponse
     {
