@@ -20,17 +20,35 @@ class ServisSeeder extends Seeder
         $reservasi3 = Reservasi::where('kode', 'RSV-DEMO-003')->firstOrFail();
 
         Servis::create([
-            'reservasi_id' => $reservasi1->id, 'kendaraan_id' => $kendaraan->id, 'mekanik_id' => $admin->id,
-            'tanggal_masuk' => Carbon::today(), 'status' => StatusServis::Dikerjakan,
-            'diagnosa' => 'Oli mesin sudah menurun kualitasnya', 'tindakan' => 'Ganti oli dan setel throttle body',
+            'reservasi_id' => $reservasi1->id,
+            'kendaraan_id' => $kendaraan->id,
+            'mekanik_id' => $admin->id,
+            'tanggal_masuk' => Carbon::today(),
+            'status' => StatusServis::Dikerjakan,
+            'odometer_awal' => 8200,
+            'odometer' => 8205,
+            'waktu_mulai' => Carbon::today()->setTime(9, 0),
+            'rincian_pekerjaan' => 'Ganti oli mesin, setel throttle body',
+            'catatan' => 'Gunakan oli 10W-30 dan periksa kondisi busi.',
             'total_biaya' => 130000,
         ]);
 
         Servis::create([
-            'reservasi_id' => $reservasi3->id, 'kendaraan_id' => $kendaraan->id, 'mekanik_id' => $admin->id,
-            'tanggal_masuk' => Carbon::yesterday(), 'tanggal_selesai' => Carbon::yesterday(),
-            'status' => StatusServis::Selesai, 'diagnosa' => 'Kampas rem aus',
-            'tindakan' => 'Ganti kampas rem depan', 'total_biaya' => 100000,
+            'reservasi_id' => $reservasi3->id,
+            'kendaraan_id' => $kendaraan->id,
+            'mekanik_id' => $admin->id,
+            'tanggal_masuk' => Carbon::yesterday(),
+            'tanggal_selesai' => Carbon::yesterday(),
+            'status' => StatusServis::Diambil,
+            'odometer_awal' => 12500,
+            'odometer' => 12510,
+            'waktu_mulai' => Carbon::yesterday()->setTime(10, 0),
+            'waktu_selesai' => Carbon::yesterday()->setTime(15, 30),
+            'rincian_pekerjaan' => 'Ganti kampas rem depan',
+            'catatan' => 'Kampas rem depan diganti, rem belakang masih layak.',
+            'total_biaya' => 100000,
         ]);
+
+        $kendaraan->update(['odometer_terakhir' => 12510]);
     }
 }

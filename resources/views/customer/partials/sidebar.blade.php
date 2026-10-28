@@ -32,6 +32,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ $activeMenu === 'riwayat' ? 'active' : '' }}">
+            <a href="{{ route('riwayat-servis.index') }}" class="menu-link" @if ($activeMenu === 'riwayat') aria-current="page" @endif>
+                <i class="menu-icon tf-icons bx bx-history" aria-hidden="true"></i>
+                <div class="text-truncate">Riwayat Servis</div>
+            </a>
+        </li>
+
         <li class="menu-item {{ $activeMenu === 'cek-slot' ? 'active' : '' }}">
             <a href="{{ route('slot.publik') }}" class="menu-link" @if ($activeMenu === 'cek-slot') aria-current="page" @endif>
                 <i class="menu-icon tf-icons bx bx-time-five" aria-hidden="true"></i>

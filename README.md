@@ -38,11 +38,11 @@ Akun demo berikut memakai password `password`:
 
 ## Database Bengkel
 
-Database memakai sembilan tabel: `users`, `merk_motor`, `layanan`, `slot_waktu`,
-`kendaraan`, `reservasi`, `reservasi_layanan`, `servis`, dan `whatsapp_logs`.
-Tabel `reservasi_layanan` adalah pivot reservasi-layanan. Foreign key dibuat berurutan
-dan `slot_waktu` memiliki unique gabungan `tanggal` + `jam_mulai`. Status reservasi
-default adalah `menunggu_konfirmasi`.
+Database memakai sepuluh tabel: `users`, `merk_motor`, `layanan`, `slot_waktu`,
+`kendaraan`, `reservasi`, `reservasi_layanan`, `servis`, `pengingat_servis`, dan
+`whatsapp_logs`. Tabel `reservasi_layanan` adalah pivot reservasi-layanan. Foreign key
+dibuat berurutan dan `slot_waktu` memiliki unique gabungan `tanggal` + `jam_mulai`.
+Status reservasi default adalah `menunggu_konfirmasi`.
 
 ## Autentikasi dan Hak Akses
 
@@ -160,12 +160,12 @@ dikonfirmasi bengkel”. Reservasi disimpan dalam `DB::transaction()` dengan
 
 Pelanggan yang memilih slot dari halaman publik diarahkan ke login. Setelah login,
 `redirect()->intended()` mengembalikan mereka ke `/booking-saya?slot=...` dengan modal dan
-slot terpilih. Halaman **Booking Saya** menampilkan daftar reservasi, detail terpisah,
-alasan penolakan, dan tombol pembatalan untuk status `menunggu_konfirmasi` atau
-`dikonfirmasi`. Dashboard customer juga menampilkan ringkasan reservasi aktif, servis
-selesai, jumlah kendaraan, total biaya servis, lima servis terakhir, slot terdekat, dan
-kartu kendaraan. Semua angka diambil dari tabel `reservasi`, `servis`, `kendaraan`, dan
-`slot_waktu`; tidak ada lagi kartu demo template. Scrollbar sidebar customer
+slot terpilih. Halaman **Booking Saya** menampilkan daftar reservasi, progres servis,
+detail terpisah, alasan penolakan, dan tombol pembatalan untuk status `menunggu_konfirmasi`
+atau `dikonfirmasi`. Dashboard customer juga menampilkan ringkasan reservasi aktif, servis
+berlangsung, jumlah kendaraan, jumlah riwayat servis, lima servis terakhir, slot terdekat,
+dan kartu kendaraan. Semua angka diambil dari tabel `reservasi`, `servis`, `kendaraan`,
+dan `slot_waktu`; tidak ada lagi kartu demo template. Scrollbar sidebar customer
 disembunyikan tanpa menghilangkan kemampuan menu untuk digulir di layar pendek.
 
 Pengujian FASE 7:
@@ -191,19 +191,39 @@ berstatus `menunggu_konfirmasi` dan dapat dibatalkan pelanggan selama berstatus
 
 Admin mengelola reservasi di `/admin/reservasi`: pencarian kode/nama/nomor HP/plat nomor,
 filter status dan rentang tanggal, detail reservasi, konfirmasi, penolakan/pembatalan,
-serta penyelesaian servis. Setiap aksi juga membuat log WhatsApp.
+serta check in kendaraan. Setiap aksi juga membuat log WhatsApp.
 
 Reservasi berstatus `menunggu_konfirmasi` yang dibatalkan admin dianggap **penolakan**:
 alasan wajib diisi, reservasi menjadi `dibatalkan`, dan log `penolakan_reservasi` dibuat.
 Pembatalan reservasi yang sudah `dikonfirmasi` memakai alasan opsional dan log
 `pembatalan_reservasi`.
 
-Setelah kendaraan selesai dikerjakan, admin membuka detail reservasi berstatus
-`dikonfirmasi` lalu mengisi form **Selesaikan Servis** (tanggal selesai, mekanik,
-diagnosa, tindakan, dan total biaya). Aksi ini membuat atau memperbarui record `servis`
-menjadi `selesai`, mengubah reservasi menjadi `selesai`, dan mencatat log WhatsApp
-`servis_selesai`. Slot otomatis tersedia lagi karena status `selesai` tidak dihitung
-sebagai reservasi aktif.
+### Alur servis
+
+Check in hanya tersedia untuk reservasi berstatus `dikonfirmasi`. Admin mengisi
+`odometer_awal`, lalu dalam satu `DB::transaction()` reservasi berubah menjadi `check_in`
+dan record `servis` dibuat berstatus `menunggu`. Halaman **Servis** di
+`/admin/servis` mendukung pencarian kode/nama/nomor HP/plat nomor, filter status, filter
+rentang `tanggal_masuk`, serta form catatan pengerjaan.
+
+Status servis bergerak maju satu langkah setiap kali:
+
+```text
+menunggu -> dikerjakan -> selesai -> diambil
+```
+
+Transisi yang melompati atau mundur ditolak. Saat menjadi `dikerjakan`, `waktu_mulai`
+diisi. Saat menjadi `selesai`, `waktu_selesai` dan `tanggal_selesai` diisi serta log
+WhatsApp `servis_selesai` dibuat. Saat menjadi `diambil`, reservasi berubah menjadi
+`selesai`, `kendaraan.odometer_terakhir` diperbarui, dan `pengingat_servis` dibuat dari
+interval hari/km layanan. Semua perubahan status memakai `DB::transaction()` dan
+`lockForUpdate()`.
+
+Form catatan servis hanya memuat `odometer`, `rincian_pekerjaan`, dan `catatan`; tidak ada
+input biaya atau sparepart. Catatan dikunci setelah status `diambil`. Pelanggan melihat
+progres servis berbentuk timeline di **Booking Saya** dan detail reservasi, serta riwayat
+per kendaraan di `/riwayat-servis` yang memuat tanggal, layanan, rincian pekerjaan,
+odometer, catatan, dan status.
 
 ### Kirim WhatsApp semi-otomatis
 
@@ -213,8 +233,8 @@ Di modal detail reservasi, tombol **Kirim WA** muncul sesuai kondisi:
 | --- | --- |
 | Kirim WA Konfirmasi | reservasi `dikonfirmasi` |
 | Kirim WA Penolakan | reservasi `dibatalkan` karena ditolak admin |
-| Kirim WA Servis Selesai | reservasi `selesai` dan `servis.status = selesai` |
-| Kirim WA Pengingat | reservasi `selesai` dan `servis.status = selesai` |
+| Kirim WA Servis Selesai | `servis.status = selesai` atau `diambil` |
+| Kirim WA Pengingat | reservasi `selesai` dan `servis.status = selesai` atau `diambil` |
 
 Saat tombol ditekan, browser mengirim POST ke
 `POST /admin/reservasi/{reservasi}/kirim-wa` di tab baru. Controller mencatat log
@@ -252,6 +272,7 @@ Pengujian alur reservasi:
 
 ```bash
 php artisan test --filter=ReservationFlowTest
+php artisan test --filter=ServiceFlowTest
 php artisan test --filter=WhatsappLinkTest
 ```
 

@@ -7,8 +7,6 @@ use App\Enums\StatusReservasi;
 use App\Enums\StatusServis;
 use App\Http\Controllers\Controller;
 use App\Models\Reservasi;
-use App\Models\Servis;
-use App\Models\User;
 use App\Services\ReservationNotificationService;
 use App\Services\WhatsappLogService;
 use App\Support\WhatsappLink;
@@ -17,7 +15,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ReservasiController extends Controller
@@ -98,22 +95,27 @@ class ReservasiController extends Controller
             ? $reservasis->total().' reservasi sesuai filter.'
             : $reservasis->total().' reservasi terdaftar.';
 
+        $statusServisLabels = [];
+        $statusServisBadges = [];
+
+        foreach (StatusServis::cases() as $statusServis) {
+            $statusServisLabels[$statusServis->value] = $statusServis->label();
+            $statusServisBadges[$statusServis->value] = $statusServis->badge();
+        }
+
         return view('admin.reservasi.index', [
             'reservasis' => $reservasis,
             'statusCounts' => $statusCounts,
             'statusLabels' => self::STATUS_LABELS,
             'statusBadges' => self::STATUS_BADGES,
+            'statusServisLabels' => $statusServisLabels,
+            'statusServisBadges' => $statusServisBadges,
             'search' => $search,
             'status' => $status,
             'dari' => $dari,
             'sampai' => $sampai,
             'subtitle' => $subtitle,
             'pusherConfigured' => $this->pusherConfigured(),
-            'mekaniks' => User::query()
-                ->where('role', 'admin')
-                ->where('aktif', true)
-                ->orderBy('name')
-                ->get(['id', 'name']),
         ]);
     }
 
@@ -184,81 +186,6 @@ class ReservasiController extends Controller
             : "Reservasi {$reservasi->kode} berhasil dibatalkan.");
     }
 
-    public function selesaikan(Request $request, Reservasi $reservasi, WhatsappLogService $whatsapp): RedirectResponse
-    {
-        $reservasi->loadMissing(['slot', 'servis']);
-
-        if ($reservasi->status !== StatusReservasi::Dikonfirmasi) {
-            return back()->withErrors([
-                'reservasi' => 'Hanya reservasi yang sudah dikonfirmasi yang dapat diselesaikan.',
-            ]);
-        }
-
-        $slotDate = $reservasi->slot?->tanggal?->toDateString();
-
-        $data = $request->validate([
-            'tanggal_selesai' => ['required', 'date', ...($slotDate ? ['after_or_equal:'.$slotDate] : [])],
-            'mekanik_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('users', 'id')->where(
-                    fn ($query) => $query->where('role', 'admin')->where('aktif', true)
-                ),
-            ],
-            'diagnosa' => ['nullable', 'string', 'max:2000'],
-            'tindakan' => ['nullable', 'string', 'max:2000'],
-            'total_biaya' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
-        ]);
-
-        DB::transaction(function () use ($reservasi, $data, $whatsapp) {
-            $locked = Reservasi::query()->lockForUpdate()->findOrFail($reservasi->id);
-
-            if ($locked->status !== StatusReservasi::Dikonfirmasi) {
-                throw ValidationException::withMessages([
-                    'reservasi' => 'Status reservasi berubah. Muat ulang halaman dan coba lagi.',
-                ]);
-            }
-
-            $locked->loadMissing(['slot', 'kendaraan.merk', 'pelanggan', 'layanan']);
-
-            $servis = Servis::query()
-                ->where('reservasi_id', $locked->id)
-                ->lockForUpdate()
-                ->first();
-
-            if ($servis && in_array($servis->status, [StatusServis::Selesai, StatusServis::Dibatalkan], true)) {
-                throw ValidationException::withMessages([
-                    'reservasi' => 'Servis untuk reservasi ini sudah selesai atau dibatalkan.',
-                ]);
-            }
-
-            $attributes = [
-                'status' => StatusServis::Selesai,
-                'tanggal_selesai' => $data['tanggal_selesai'],
-                'mekanik_id' => $data['mekanik_id'] ?? null,
-                'diagnosa' => $data['diagnosa'] ?? null,
-                'tindakan' => $data['tindakan'] ?? null,
-                'total_biaya' => $data['total_biaya'] ?? 0,
-            ];
-
-            if ($servis) {
-                $servis->update($attributes);
-            } else {
-                $servis = Servis::create($attributes + [
-                    'reservasi_id' => $locked->id,
-                    'kendaraan_id' => $locked->kendaraan_id,
-                    'tanggal_masuk' => $locked->slot?->tanggal?->toDateString() ?? $data['tanggal_selesai'],
-                ]);
-            }
-
-            $locked->update(['status' => StatusReservasi::Selesai]);
-
-            $whatsapp->serviceCompleted($locked);
-        });
-
-        return back()->with('status', "Servis {$reservasi->kode} ditandai selesai.");
-    }
-
     public function kirimWhatsapp(Request $request, Reservasi $reservasi, WhatsappLogService $whatsapp): RedirectResponse
     {
         $data = $request->validate([
@@ -289,7 +216,11 @@ class ReservasiController extends Controller
 
     private function whatsappEligibilityError(Reservasi $reservasi, JenisWhatsapp $jenis): ?string
     {
-        $servisSelesai = $reservasi->servis?->status === StatusServis::Selesai;
+        $servisSelesai = in_array(
+            $reservasi->servis?->status,
+            [StatusServis::Selesai, StatusServis::Diambil],
+            true,
+        );
 
         return match ($jenis) {
             JenisWhatsapp::KonfirmasiReservasi => $reservasi->status === StatusReservasi::Dikonfirmasi
@@ -299,7 +230,7 @@ class ReservasiController extends Controller
                 && $reservasi->whatsappLogs->contains(fn ($log) => $log->jenis === JenisWhatsapp::PenolakanReservasi))
                     ? null
                     : 'Pesan penolakan hanya dapat dikirim untuk reservasi yang ditolak.',
-            JenisWhatsapp::ServisSelesai => $reservasi->status === StatusReservasi::Selesai && $servisSelesai
+            JenisWhatsapp::ServisSelesai => $servisSelesai
                 ? null
                 : 'Pesan servis selesai hanya dapat dikirim setelah servis berstatus selesai.',
             JenisWhatsapp::PengingatServis => $reservasi->status === StatusReservasi::Selesai && $servisSelesai

@@ -33,6 +33,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('admin.servis.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.servis.index') }}" class="menu-link" @if (request()->routeIs('admin.servis.*')) aria-current="page" @endif>
+                <i class="menu-icon tf-icons bx bx-wrench" aria-hidden="true"></i>
+                <div class="text-truncate">Servis</div>
+            </a>
+        </li>
+
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Data Master</span></li>
 
         <li class="menu-item {{ request()->routeIs('admin.merk-motor.*') ? 'active' : '' }}">

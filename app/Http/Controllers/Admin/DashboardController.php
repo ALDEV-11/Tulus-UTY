@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\StatusReservasi;
+use App\Enums\StatusServis;
 use App\Http\Controllers\Controller;
 use App\Models\Kendaraan;
 use App\Models\Layanan;
@@ -110,7 +111,7 @@ class DashboardController extends Controller
             ->get();
 
         $servisTerbaru = Servis::query()
-            ->with(['kendaraan.merk', 'mekanik'])
+            ->with(['kendaraan.merk', 'reservasi.layanan'])
             ->latest('tanggal_masuk')
             ->limit(5)
             ->get();
@@ -122,8 +123,10 @@ class DashboardController extends Controller
             'reservasiMenunggu' => $reservasiPerStatus[StatusReservasi::MenungguKonfirmasi->value] ?? 0,
             'totalPendapatan' => $totalPendapatan,
             'totalServis' => $servisPerStatus->sum(),
-            'servisAktif' => ($servisPerStatus['dijadwalkan'] ?? 0) + ($servisPerStatus['dikerjakan'] ?? 0),
-            'servisSelesai' => $servisPerStatus['selesai'] ?? 0,
+            'servisAktif' => ($servisPerStatus[StatusServis::Menunggu->value] ?? 0)
+                + ($servisPerStatus[StatusServis::Dikerjakan->value] ?? 0),
+            'servisSelesai' => ($servisPerStatus[StatusServis::Selesai->value] ?? 0)
+                + ($servisPerStatus[StatusServis::Diambil->value] ?? 0),
             'pelangganTotal' => User::where('role', 'pelanggan')->count(),
             'pelangganAktif' => User::where('role', 'pelanggan')->where('aktif', true)->count(),
             'totalKendaraan' => Kendaraan::count(),

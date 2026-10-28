@@ -103,6 +103,66 @@
           </p>
         </div>
       </div>
+
+      @if ($reservasi->servis)
+        <div class="card mt-4">
+          <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+            <div>
+              <h5 class="mb-1">Progres Servis</h5>
+              <p class="card-subtitle mb-0">Posisi kendaraan Anda saat ini.</p>
+            </div>
+            <span class="badge bg-label-{{ $reservasi->servis->status->badge() }}">
+              {{ $reservasi->servis->status->label() }}
+            </span>
+          </div>
+          <div class="card-body">
+            @include('partials.service-timeline', ['servis' => $reservasi->servis])
+
+            <div class="row g-3 mt-4">
+              <div class="col-12 col-sm-6">
+                <div class="small text-body-secondary">Odometer saat masuk</div>
+                <div class="fw-semibold">
+                  {{ $reservasi->servis->odometer_awal !== null
+                    ? number_format($reservasi->servis->odometer_awal, 0, ',', '.').' km'
+                    : '-' }}
+                </div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="small text-body-secondary">Odometer akhir</div>
+                <div class="fw-semibold">
+                  {{ $reservasi->servis->odometer !== null
+                    ? number_format($reservasi->servis->odometer, 0, ',', '.').' km'
+                    : '-' }}
+                </div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="small text-body-secondary">Mulai dikerjakan</div>
+                <div class="fw-semibold">{{ $reservasi->servis->waktu_mulai?->translatedFormat('d M Y H:i') ?? '-' }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="small text-body-secondary">Selesai dikerjakan</div>
+                <div class="fw-semibold">{{ $reservasi->servis->waktu_selesai?->translatedFormat('d M Y H:i') ?? '-' }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="small text-body-secondary">Rincian pekerjaan</div>
+                <div class="text-break" style="white-space: pre-line">
+                  {{ $reservasi->servis->rincian_pekerjaan ?: '-' }}
+                </div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="small text-body-secondary">Catatan</div>
+                <div class="text-break" style="white-space: pre-line">
+                  {{ $reservasi->servis->catatan ?: '-' }}
+                </div>
+              </div>
+            </div>
+
+            <a href="{{ route('riwayat-servis.index', ['kendaraan' => $reservasi->kendaraan_id]) }}" class="btn btn-sm btn-outline-primary mt-4">
+              <i class="icon-base bx bx-history me-1" aria-hidden="true"></i>Lihat Riwayat Kendaraan
+            </a>
+          </div>
+        </div>
+      @endif
     </div>
 
     <div class="col-12 col-lg-4">
@@ -114,10 +174,17 @@
           @if ($reservasi->servis)
             <div class="border rounded p-3 mt-3">
               <div class="small text-body-secondary">Status Servis</div>
-              <div class="fw-semibold">{{ ucfirst($reservasi->servis->status->value) }}</div>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <span class="badge bg-label-{{ $reservasi->servis->status->badge() }}">
+                  {{ $reservasi->servis->status->label() }}
+                </span>
+              </div>
               @if ($reservasi->servis->mekanik)
-                <div class="small text-body-secondary mt-1">Mekanik: {{ $reservasi->servis->mekanik->name }}</div>
+                <div class="small text-body-secondary mt-2">Mekanik: {{ $reservasi->servis->mekanik->name }}</div>
               @endif
+              <a href="{{ route('riwayat-servis.index', ['kendaraan' => $reservasi->kendaraan_id]) }}" class="small text-decoration-none d-inline-block mt-2">
+                Lihat riwayat kendaraan
+              </a>
             </div>
           @endif
 

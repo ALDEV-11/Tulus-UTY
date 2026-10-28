@@ -15,16 +15,16 @@
         'dibatalkan' => 'danger',
     ];
     $statusServisLabel = [
-        'dijadwalkan' => 'Dijadwalkan',
+        'menunggu' => 'Menunggu',
         'dikerjakan' => 'Dikerjakan',
         'selesai' => 'Selesai',
-        'dibatalkan' => 'Dibatalkan',
+        'diambil' => 'Diambil',
     ];
     $statusServisBadge = [
-        'dijadwalkan' => 'info',
-        'dikerjakan' => 'warning',
+        'menunggu' => 'warning',
+        'dikerjakan' => 'info',
         'selesai' => 'success',
-        'dibatalkan' => 'danger',
+        'diambil' => 'primary',
     ];
     $statusReservasiColors = ['#ffab00', '#696cff', '#03c3ec', '#71dd37', '#ff3e1d'];
     $totalStatusReservasi = array_sum($chartStatusReservasi['data']);
@@ -310,17 +310,17 @@
                     <h5 class="mb-1">Servis Terbaru</h5>
                     <p class="card-subtitle mb-0">5 servis terakhir</p>
                 </div>
-                <span class="badge bg-label-success">{{ $servisTerbaru->count() }} data</span>
+                <a href="{{ route('admin.servis.index') }}" class="btn btn-sm btn-outline-primary">Kelola Servis</a>
             </div>
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
-                    <caption class="visually-hidden">Daftar servis terbaru beserta kendaraan, mekanik, biaya, dan statusnya</caption>
+                    <caption class="visually-hidden">Daftar servis terbaru beserta kendaraan, pekerjaan, odometer, tanggal masuk, dan statusnya</caption>
                     <thead class="table-light">
                         <tr>
                             <th scope="col">Kendaraan</th>
-                            <th scope="col">Mekanik</th>
+                            <th scope="col">Pekerjaan</th>
+                            <th scope="col" class="d-none d-lg-table-cell">Odometer</th>
                             <th scope="col">Masuk</th>
-                            <th scope="col" class="text-end">Biaya</th>
                             <th scope="col" class="text-center">Status</th>
                         </tr>
                     </thead>
@@ -334,9 +334,17 @@
                                     <span class="fw-semibold">{{ $servis->kendaraan?->plat_nomor ?? '-' }}</span><br>
                                     <small class="text-body-secondary">{{ $servis->kendaraan?->merk?->nama ?? '-' }}</small>
                                 </td>
-                                <td>{{ $servis->mekanik?->name ?? '-' }}</td>
+                                <td>
+                                    <span class="d-inline-block text-truncate" style="max-width: 12rem" title="{{ $servis->rincian_pekerjaan ?: 'Belum ada rincian pekerjaan' }}">
+                                        {{ $servis->rincian_pekerjaan ?: '-' }}
+                                    </span>
+                                </td>
+                                <td class="d-none d-lg-table-cell text-nowrap">
+                                    {{ $servis->odometerTampil() !== null
+                                        ? number_format($servis->odometerTampil(), 0, ',', '.').' km'
+                                        : '-' }}
+                                </td>
                                 <td class="text-nowrap">{{ $servis->tanggal_masuk?->translatedFormat('d M Y') ?? '-' }}</td>
-                                <td class="text-end text-nowrap">Rp {{ number_format((float) $servis->total_biaya, 0, ',', '.') }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-label-{{ $statusServisBadge[$status] ?? 'secondary' }}">
                                         {{ $statusServisLabel[$status] ?? $status }}

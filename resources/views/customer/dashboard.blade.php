@@ -14,16 +14,16 @@
         'dibatalkan' => 'secondary',
     ];
     $statusServisLabel = [
-        'dijadwalkan' => 'Dijadwalkan',
+        'menunggu' => 'Menunggu',
         'dikerjakan' => 'Dikerjakan',
         'selesai' => 'Selesai',
-        'dibatalkan' => 'Dibatalkan',
+        'diambil' => 'Diambil',
     ];
     $statusServisBadge = [
-        'dijadwalkan' => 'info',
-        'dikerjakan' => 'warning',
+        'menunggu' => 'warning',
+        'dikerjakan' => 'info',
         'selesai' => 'success',
-        'dibatalkan' => 'danger',
+        'diambil' => 'primary',
     ];
     $canBook = $availableSlots->isNotEmpty() && $layanans->isNotEmpty();
     $oldLayanan = array_map('intval', (array) old('layanan', []));
@@ -187,16 +187,16 @@
                     <div class="card-body">
                       <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
                         <div>
-                          <p class="text-body-secondary mb-1">Servis Selesai</p>
-                          <h4 class="mb-0">{{ number_format($ringkasan['servis_selesai'], 0, ',', '.') }}</h4>
+                          <p class="text-body-secondary mb-1">Servis Berlangsung</p>
+                          <h4 class="mb-0">{{ number_format($ringkasan['servis_berlangsung'], 0, ',', '.') }}</h4>
                         </div>
                         <span class="avatar avatar-sm">
-                          <span class="avatar-initial rounded-circle bg-label-success">
-                            <i class="icon-base bx bx-check-circle" aria-hidden="true"></i>
+                          <span class="avatar-initial rounded-circle bg-label-info">
+                            <i class="icon-base bx bx-wrench" aria-hidden="true"></i>
                           </span>
                         </span>
                       </div>
-                      <small class="text-body-secondary">Servis kendaraan Anda yang sudah selesai.</small>
+                      <small class="text-body-secondary">Kendaraan yang menunggu atau sedang dikerjakan.</small>
                     </div>
                   </div>
                 </div>
@@ -225,16 +225,16 @@
                     <div class="card-body">
                       <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
                         <div>
-                          <p class="text-body-secondary mb-1">Total Biaya Servis</p>
-                          <h4 class="mb-0">Rp {{ number_format($ringkasan['total_biaya_servis'], 0, ',', '.') }}</h4>
+                          <p class="text-body-secondary mb-1">Riwayat Servis</p>
+                          <h4 class="mb-0">{{ number_format($ringkasan['servis_selesai'], 0, ',', '.') }}</h4>
                         </div>
                         <span class="avatar avatar-sm">
-                          <span class="avatar-initial rounded-circle bg-label-info">
-                            <i class="icon-base bx bx-receipt" aria-hidden="true"></i>
+                          <span class="avatar-initial rounded-circle bg-label-success">
+                            <i class="icon-base bx bx-history" aria-hidden="true"></i>
                           </span>
                         </span>
                       </div>
-                      <small class="text-body-secondary">Akumulasi biaya servis kendaraan Anda.</small>
+                      <a href="{{ route('riwayat-servis.index') }}" class="small text-decoration-none">Lihat riwayat servis</a>
                     </div>
                   </div>
                 </div>
@@ -297,6 +297,7 @@
                                 <th scope="col">Kendaraan</th>
                                 <th scope="col" class="d-none d-lg-table-cell">Layanan</th>
                                 <th scope="col" class="text-center">Status</th>
+                                <th scope="col" class="text-center">Progres Servis</th>
                                 <th scope="col" class="text-end">Aksi</th>
                               </tr>
                             </thead>
@@ -336,6 +337,13 @@
                                     <span class="badge bg-label-{{ $badgeStatus }}">{{ $labelStatus }}</span>
                                     @if ($alasanPenolakan)
                                       <div class="small text-danger mt-1" style="max-width: 14rem">{{ $alasanPenolakan }}</div>
+                                    @endif
+                                  </td>
+                                  <td class="text-center" style="min-width: 10rem;">
+                                    @if ($reservasi->servis)
+                                      @include('partials.service-timeline', ['servis' => $reservasi->servis, 'compact' => true])
+                                    @else
+                                      <span class="small text-body-secondary">Belum check in</span>
                                     @endif
                                   </td>
                                   <td class="text-end">
@@ -381,7 +389,7 @@
                         <h5 class="mb-1">Servis Terakhir</h5>
                         <p class="card-subtitle mb-0">Riwayat servis kendaraan Anda.</p>
                       </div>
-                      <a href="{{ route('kendaraan.index') }}" class="btn btn-sm btn-outline-primary">Kendaraan Saya</a>
+                      <a href="{{ route('riwayat-servis.index') }}" class="btn btn-sm btn-outline-primary">Riwayat Servis</a>
                     </div>
                     <div class="card-body">
                       @if ($servisTerakhir->isEmpty())
@@ -392,7 +400,7 @@
                             </span>
                           </div>
                           <h6 class="mb-1">Belum ada riwayat servis</h6>
-                          <p class="mb-0">Servis akan muncul di sini setelah reservasi Anda selesai dikerjakan.</p>
+                          <p class="mb-0">Servis akan muncul di sini setelah kendaraan Anda check in.</p>
                         </div>
                       @else
                         <div class="table-responsive">
@@ -402,15 +410,17 @@
                               <tr>
                                 <th scope="col">Tanggal</th>
                                 <th scope="col">Kendaraan</th>
-                                <th scope="col" class="d-none d-md-table-cell">Tindakan</th>
+                                <th scope="col" class="d-none d-lg-table-cell">Layanan</th>
+                                <th scope="col" class="d-none d-md-table-cell">Pekerjaan</th>
+                                <th scope="col" class="d-none d-lg-table-cell">Odometer</th>
                                 <th scope="col">Status</th>
-                                <th scope="col" class="text-end">Biaya</th>
                               </tr>
                             </thead>
                             <tbody class="table-border-bottom-0">
                               @foreach ($servisTerakhir as $servis)
                                 @php
                                   $servisStatus = $servis->status->value;
+                                  $layananServis = $servis->reservasi?->layanan->pluck('nama')->join(', ');
                                 @endphp
                                 <tr>
                                   <td class="text-nowrap">
@@ -425,21 +435,23 @@
                                       {{ trim(($servis->kendaraan?->merk?->nama ?? '').' '.($servis->kendaraan?->model ?? '')) ?: '-' }}
                                     </small>
                                   </td>
-                                  <td class="d-none d-md-table-cell">
-                                    <span class="d-inline-block text-truncate" style="max-width: 18rem" title="{{ $servis->tindakan ?: 'Belum ada tindakan' }}">
-                                      {{ $servis->tindakan ?: 'Belum ada tindakan' }}
+                                  <td class="d-none d-lg-table-cell">
+                                    <span class="d-inline-block text-truncate" style="max-width: 14rem" title="{{ $layananServis ?: 'Belum ada layanan' }}">
+                                      {{ $layananServis ?: '-' }}
                                     </span>
-                                    @if ($servis->mekanik)
-                                      <br><small class="text-body-secondary">Mekanik: {{ $servis->mekanik->name }}</small>
-                                    @endif
+                                  </td>
+                                  <td class="d-none d-md-table-cell">
+                                    <span class="d-inline-block text-truncate" style="max-width: 18rem" title="{{ $servis->rincian_pekerjaan ?: 'Belum ada rincian pekerjaan' }}">
+                                      {{ $servis->rincian_pekerjaan ?: '-' }}
+                                    </span>
+                                  </td>
+                                  <td class="d-none d-lg-table-cell text-nowrap">
+                                    {{ $servis->odometerTampil() !== null ? number_format($servis->odometerTampil(), 0, ',', '.').' km' : '-' }}
                                   </td>
                                   <td>
                                     <span class="badge bg-label-{{ $statusServisBadge[$servisStatus] ?? 'secondary' }}">
                                       {{ $statusServisLabel[$servisStatus] ?? $servisStatus }}
                                     </span>
-                                  </td>
-                                  <td class="text-end text-nowrap">
-                                    Rp {{ number_format((float) $servis->total_biaya, 0, ',', '.') }}
                                   </td>
                                 </tr>
                               @endforeach

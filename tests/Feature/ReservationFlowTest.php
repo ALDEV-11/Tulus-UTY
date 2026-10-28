@@ -17,8 +17,8 @@ use App\Models\WhatsappLog;
 use App\Services\WhatsappLogService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Testing\TestResponse;
 use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class ReservationFlowTest extends TestCase
@@ -26,10 +26,15 @@ class ReservationFlowTest extends TestCase
     use DatabaseTransactions;
 
     private User $admin;
+
     private User $customer;
+
     private MerkMotor $merk;
+
     private Layanan $layanan;
+
     private SlotWaktu $slot;
+
     private Kendaraan $kendaraan;
 
     protected function setUp(): void
@@ -212,123 +217,16 @@ class ReservationFlowTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_complete_confirmed_reservation_and_service_is_created(): void
-    {
-        $reservasi = $this->createReservation();
-
-        $this->actingAs($this->admin)
-            ->patch(route('admin.reservasi.konfirmasi', $reservasi))
-            ->assertRedirect();
-
-        $response = $this->actingAs($this->admin)->patch(route('admin.reservasi.selesaikan', $reservasi), [
-            'tanggal_selesai' => $this->slot->tanggal->toDateString(),
-            'mekanik_id' => $this->admin->id,
-            'diagnosa' => 'Oli mesin kotor',
-            'tindakan' => 'Ganti oli mesin',
-            'total_biaya' => 150000,
-        ]);
-
-        $response->assertRedirect();
-        $response->assertSessionHas('status');
-
-        $reservasi->refresh();
-
-        $this->assertSame(StatusReservasi::Selesai, $reservasi->status);
-
-        $servis = Servis::query()->where('reservasi_id', $reservasi->id)->firstOrFail();
-
-        $this->assertSame(StatusServis::Selesai, $servis->status);
-        $this->assertSame($this->slot->tanggal->toDateString(), $servis->tanggal_masuk->toDateString());
-        $this->assertSame($this->slot->tanggal->toDateString(), $servis->tanggal_selesai->toDateString());
-        $this->assertSame($this->admin->id, $servis->mekanik_id);
-        $this->assertSame('Ganti oli mesin', $servis->tindakan);
-        $this->assertSame('150000.00', $servis->total_biaya);
-
-        $this->assertDatabaseHas('whatsapp_logs', [
-            'reservasi_id' => $reservasi->id,
-            'jenis' => 'servis_selesai',
-            'status' => 'menunggu',
-        ]);
-    }
-
-    public function test_admin_cannot_complete_reservation_before_confirmation(): void
-    {
-        $reservasi = $this->createReservation();
-
-        $response = $this->actingAs($this->admin)->patch(route('admin.reservasi.selesaikan', $reservasi), [
-            'tanggal_selesai' => $this->slot->tanggal->toDateString(),
-            'total_biaya' => 100000,
-        ]);
-
-        $response->assertSessionHasErrors('reservasi');
-        $this->assertSame(StatusReservasi::MenungguKonfirmasi, $reservasi->fresh()->status);
-        $this->assertDatabaseMissing('servis', ['reservasi_id' => $reservasi->id]);
-    }
-
-    public function test_admin_can_complete_existing_service(): void
-    {
-        $reservasi = $this->createReservation(['status' => StatusReservasi::Dikonfirmasi]);
-
-        $servis = Servis::create([
-            'reservasi_id' => $reservasi->id,
-            'kendaraan_id' => $this->kendaraan->id,
-            'tanggal_masuk' => $this->slot->tanggal->toDateString(),
-            'status' => StatusServis::Dikerjakan,
-            'diagnosa' => 'Diagnosa awal',
-        ]);
-
-        $response = $this->actingAs($this->admin)->patch(route('admin.reservasi.selesaikan', $reservasi), [
-            'tanggal_selesai' => $this->slot->tanggal->toDateString(),
-            'diagnosa' => 'Diagnosa akhir',
-            'tindakan' => 'Servis selesai',
-            'total_biaya' => 200000,
-        ]);
-
-        $response->assertRedirect();
-
-        $servis->refresh();
-
-        $this->assertSame(StatusServis::Selesai, $servis->status);
-        $this->assertSame('Diagnosa akhir', $servis->diagnosa);
-        $this->assertSame('Servis selesai', $servis->tindakan);
-        $this->assertSame('200000.00', $servis->total_biaya);
-        $this->assertSame(1, Servis::query()->where('reservasi_id', $reservasi->id)->count());
-        $this->assertSame(StatusReservasi::Selesai, $reservasi->fresh()->status);
-    }
-
-    public function test_admin_cannot_complete_reservation_twice(): void
-    {
-        $reservasi = $this->createReservation(['status' => StatusReservasi::Dikonfirmasi]);
-        $payload = [
-            'tanggal_selesai' => $this->slot->tanggal->toDateString(),
-            'total_biaya' => 100000,
-        ];
-
-        $this->actingAs($this->admin)
-            ->patch(route('admin.reservasi.selesaikan', $reservasi), $payload)
-            ->assertRedirect();
-
-        $response = $this->actingAs($this->admin)
-            ->patch(route('admin.reservasi.selesaikan', $reservasi), $payload);
-
-        $response->assertSessionHasErrors('reservasi');
-        $this->assertSame(1, Servis::query()->where('reservasi_id', $reservasi->id)->count());
-        $this->assertSame(1, WhatsappLog::query()
-            ->where('reservasi_id', $reservasi->id)
-            ->where('jenis', 'servis_selesai')
-            ->count());
-    }
-
-    public function test_admin_reservation_page_shows_finish_service_form_for_confirmed_reservation(): void
+    public function test_admin_reservation_page_shows_check_in_form_for_confirmed_reservation(): void
     {
         $reservasi = $this->createReservation(['status' => StatusReservasi::Dikonfirmasi]);
 
         $this->actingAs($this->admin)
             ->get(route('admin.reservasi.index'))
             ->assertOk()
-            ->assertSee('Selesaikan Servis')
-            ->assertSee('name="tanggal_selesai"', false)
-            ->assertSee('form-selesaikan-servis-'.$reservasi->id, false);
+            ->assertSee('Check In Kendaraan')
+            ->assertSee('name="odometer_awal"', false)
+            ->assertSee('form-check-in-'.$reservasi->id, false);
     }
 
     public function test_admin_reservation_page_and_notification_endpoint_work(): void
@@ -393,14 +291,14 @@ class ReservationFlowTest extends TestCase
             ->assertOk()
             ->assertViewHas('ringkasan', function (array $ringkasan) {
                 return $ringkasan['reservasi_aktif'] === 1
+                    && $ringkasan['servis_berlangsung'] === 0
                     && $ringkasan['servis_selesai'] === 1
-                    && $ringkasan['kendaraan'] === 1
-                    && (float) $ringkasan['total_biaya_servis'] === 150000.0;
+                    && $ringkasan['kendaraan'] === 1;
             })
             ->assertSee('Reservasi Aktif')
-            ->assertSee('Servis Selesai')
-            ->assertSee('Total Biaya Servis')
-            ->assertSee('Rp 150.000')
+            ->assertSee('Servis Berlangsung')
+            ->assertSee('Riwayat Servis')
+            ->assertDontSee('Total Biaya Servis')
             ->assertSee('Servis Terakhir')
             ->assertSee('Slot Terdekat')
             ->assertSee('Kendaraan Saya')

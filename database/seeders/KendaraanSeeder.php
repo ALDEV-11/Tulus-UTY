@@ -20,6 +20,7 @@ class KendaraanSeeder extends Seeder
             'model' => 'Vario 160',
             'tahun' => 2023,
             'kilometer' => 8200,
+            'odometer_terakhir' => 8200,
         ]);
 
         Kendaraan::create([
@@ -29,6 +30,7 @@ class KendaraanSeeder extends Seeder
             'model' => 'NMAX 155',
             'tahun' => 2022,
             'kilometer' => 12500,
+            'odometer_terakhir' => 12500,
         ]);
     }
 }

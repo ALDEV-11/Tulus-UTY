@@ -15,17 +15,17 @@
         'selesai' => 'success',
         'dibatalkan' => 'secondary',
     ];
-    $statusServisLabels = [
-        'dijadwalkan' => 'Dijadwalkan',
+    $statusServisLabels = $statusServisLabels ?? [
+        'menunggu' => 'Menunggu',
         'dikerjakan' => 'Dikerjakan',
         'selesai' => 'Selesai',
-        'dibatalkan' => 'Dibatalkan',
+        'diambil' => 'Diambil',
     ];
-    $statusServisBadges = [
-        'dijadwalkan' => 'info',
-        'dikerjakan' => 'warning',
+    $statusServisBadges = $statusServisBadges ?? [
+        'menunggu' => 'warning',
+        'dikerjakan' => 'info',
         'selesai' => 'success',
-        'dibatalkan' => 'danger',
+        'diambil' => 'primary',
     ];
     $whatsappStatusLabels = [
         'menunggu' => 'Menunggu',
@@ -336,8 +336,10 @@
         $layananLabel = $reservasi->layanan->pluck('nama')->join(', ');
         $servis = $reservasi->servis;
         $servisStatusValue = $servis?->status?->value;
-        $canFinish = $statusValue === 'dikonfirmasi'
-            && (! $servis || ! in_array($servisStatusValue, ['selesai', 'dibatalkan'], true));
+        $canCheckIn = $statusValue === 'dikonfirmasi' && ! $servis;
+        $canSendCompleted = $servisStatusValue !== null
+            && in_array($servisStatusValue, ['selesai', 'diambil'], true);
+        $canSendReminder = $statusValue === 'selesai' && $canSendCompleted;
         $nomorWhatsapp = $reservasi->pelanggan?->no_hp;
         $nomorWhatsappValid = \App\Support\WhatsappLink::normalize($nomorWhatsapp) !== null;
         $pernahDitolak = $reservasi->whatsappLogs->contains(
@@ -361,12 +363,15 @@
             ];
         }
 
-        if ($statusValue === 'selesai' && $servisStatusValue === 'selesai') {
+        if ($canSendCompleted) {
             $waActions[] = [
                 'jenis' => 'servis_selesai',
                 'label' => 'Kirim WA Servis Selesai',
                 'class' => 'btn-outline-success',
             ];
+        }
+
+        if ($canSendReminder) {
             $waActions[] = [
                 'jenis' => 'pengingat_servis',
                 'label' => 'Kirim WA Pengingat',
@@ -504,25 +509,28 @@
                                 <h6 class="mb-1"><i class="icon-base bx bx-wrench me-2 text-primary" aria-hidden="true"></i>Servis</h6>
                                 <small class="text-body-secondary">
                                     @if ($servis)
-                                        Data servis untuk reservasi ini.
+                                        Progres pengerjaan dan catatan servis untuk reservasi ini.
                                     @else
-                                        Belum ada data servis. Data akan dibuat saat servis diselesaikan.
+                                        Check in kendaraan saat pelanggan datang untuk membuat data servis.
                                     @endif
                                 </small>
                             </div>
-                            @if ($servis)
-                                <span class="badge bg-label-{{ $statusServisBadges[$servisStatusValue] ?? 'secondary' }}">
-                                    {{ $statusServisLabels[$servisStatusValue] ?? $servisStatusValue }}
-                                </span>
-                            @endif
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                @if ($servis)
+                                    <span class="badge bg-label-{{ $statusServisBadges[$servisStatusValue] ?? 'secondary' }}">
+                                        {{ $statusServisLabels[$servisStatusValue] ?? $servisStatusValue }}
+                                    </span>
+                                    <a href="{{ route('admin.servis.index', ['q' => $reservasi->kode]) }}" class="btn btn-sm btn-outline-primary">
+                                        Kelola Servis
+                                    </a>
+                                @endif
+                            </div>
                         </div>
 
                         @if ($servis)
-                            <div class="row g-3">
-                                <div class="col-12 col-sm-6 col-lg-3">
-                                    <div class="reservation-detail-label">Mekanik</div>
-                                    <div class="reservation-detail-value">{{ $servis->mekanik?->name ?? '-' }}</div>
-                                </div>
+                            @include('partials.service-timeline', ['servis' => $servis])
+
+                            <div class="row g-3 mt-1">
                                 <div class="col-12 col-sm-6 col-lg-3">
                                     <div class="reservation-detail-label">Tanggal masuk</div>
                                     <div class="reservation-detail-value">{{ $servis->tanggal_masuk?->translatedFormat('d M Y') ?? '-' }}</div>
@@ -532,109 +540,74 @@
                                     <div class="reservation-detail-value">{{ $servis->tanggal_selesai?->translatedFormat('d M Y') ?? '-' }}</div>
                                 </div>
                                 <div class="col-12 col-sm-6 col-lg-3">
-                                    <div class="reservation-detail-label">Total biaya</div>
+                                    <div class="reservation-detail-label">Mulai dikerjakan</div>
+                                    <div class="reservation-detail-value">{{ $servis->waktu_mulai?->translatedFormat('d M Y H:i') ?? '-' }}</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3">
+                                    <div class="reservation-detail-label">Selesai dikerjakan</div>
+                                    <div class="reservation-detail-value">{{ $servis->waktu_selesai?->translatedFormat('d M Y H:i') ?? '-' }}</div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="reservation-detail-label">Odometer awal</div>
                                     <div class="reservation-detail-value">
-                                        Rp {{ number_format((float) $servis->total_biaya, 0, ',', '.') }}
+                                        {{ $servis->odometer_awal !== null ? number_format($servis->odometer_awal, 0, ',', '.').' km' : '-' }}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="reservation-detail-label">Odometer akhir</div>
+                                    <div class="reservation-detail-value">
+                                        {{ $servis->odometer !== null ? number_format($servis->odometer, 0, ',', '.').' km' : '-' }}
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-6">
-                                    <div class="reservation-detail-label">Diagnosa</div>
-                                    <div class="text-break">{{ $servis->diagnosa ?: '-' }}</div>
+                                    <div class="reservation-detail-label">Rincian pekerjaan</div>
+                                    <div class="text-break" style="white-space: pre-line">{{ $servis->rincian_pekerjaan ?: '-' }}</div>
                                 </div>
                                 <div class="col-12 col-lg-6">
-                                    <div class="reservation-detail-label">Tindakan</div>
-                                    <div class="text-break">{{ $servis->tindakan ?: '-' }}</div>
+                                    <div class="reservation-detail-label">Catatan servis</div>
+                                    <div class="text-break" style="white-space: pre-line">{{ $servis->catatan ?: '-' }}</div>
                                 </div>
                             </div>
                         @endif
 
-                        @if ($canFinish)
+                        @if ($canCheckIn)
                             <hr class="my-4">
-                            <h6 class="mb-1">Selesaikan Servis</h6>
+                            <h6 class="mb-1">Check In Kendaraan</h6>
                             <p class="small text-body-secondary mb-3">
-                                Reservasi akan otomatis berstatus selesai dan pelanggan menerima log WhatsApp.
+                                Masukkan odometer saat kendaraan masuk. Data servis akan dibuat dengan status
+                                <strong>Menunggu</strong> dan reservasi berubah menjadi <strong>Check In</strong>.
                             </p>
 
                             <form
                                 method="POST"
-                                id="form-selesaikan-servis-{{ $reservasi->id }}"
-                                action="{{ route('admin.reservasi.selesaikan', $reservasi) }}"
-                                onsubmit="return confirm('Tandai servis {{ $reservasi->kode }} sebagai selesai?')">
+                                id="form-check-in-{{ $reservasi->id }}"
+                                action="{{ route('admin.reservasi.check-in', $reservasi) }}"
+                                onsubmit="return confirm('Check in kendaraan untuk reservasi {{ $reservasi->kode }}?')">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="_modal" value="modalDetailReservasi{{ $reservasi->id }}">
 
                                 <div class="row g-3">
                                     <div class="col-12 col-sm-6">
-                                        <label class="form-label" for="tanggal-selesai-{{ $reservasi->id }}">Tanggal selesai</label>
-                                        <input
-                                            type="date"
-                                            class="form-control @error('tanggal_selesai') is-invalid @enderror"
-                                            id="tanggal-selesai-{{ $reservasi->id }}"
-                                            name="tanggal_selesai"
-                                            value="{{ old('tanggal_selesai', $servis?->tanggal_selesai?->toDateString() ?? today()->toDateString()) }}"
-                                            @if ($reservasi->slot?->tanggal) min="{{ $reservasi->slot->tanggal->toDateString() }}" @endif
-                                            required>
-                                        @error('tanggal_selesai')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-12 col-sm-6">
-                                        <label class="form-label" for="mekanik-{{ $reservasi->id }}">Mekanik</label>
-                                        <select class="form-select @error('mekanik_id') is-invalid @enderror" id="mekanik-{{ $reservasi->id }}" name="mekanik_id">
-                                            <option value="">Belum ditentukan</option>
-                                            @foreach ($mekaniks as $mekanik)
-                                                <option value="{{ $mekanik->id }}" @selected((string) old('mekanik_id', $servis?->mekanik_id) === (string) $mekanik->id)>
-                                                    {{ $mekanik->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('mekanik_id')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-12 col-lg-6">
-                                        <label class="form-label" for="diagnosa-{{ $reservasi->id }}">Diagnosa</label>
-                                        <textarea
-                                            class="form-control @error('diagnosa') is-invalid @enderror"
-                                            id="diagnosa-{{ $reservasi->id }}"
-                                            name="diagnosa"
-                                            rows="2"
-                                            maxlength="2000"
-                                            placeholder="Contoh: oli mesin sudah waktunya diganti">{{ old('diagnosa', $servis?->diagnosa) }}</textarea>
-                                        @error('diagnosa')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-12 col-lg-6">
-                                        <label class="form-label" for="tindakan-{{ $reservasi->id }}">Tindakan</label>
-                                        <textarea
-                                            class="form-control @error('tindakan') is-invalid @enderror"
-                                            id="tindakan-{{ $reservasi->id }}"
-                                            name="tindakan"
-                                            rows="2"
-                                            maxlength="2000"
-                                            placeholder="Contoh: ganti oli dan setel mesin">{{ old('tindakan', $servis?->tindakan) }}</textarea>
-                                        @error('tindakan')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-12 col-sm-6">
-                                        <label class="form-label" for="total-biaya-{{ $reservasi->id }}">Total biaya (Rp)</label>
+                                        <label class="form-label" for="odometer-awal-{{ $reservasi->id }}">Odometer awal (km)</label>
                                         <input
                                             type="number"
-                                            class="form-control @error('total_biaya') is-invalid @enderror"
-                                            id="total-biaya-{{ $reservasi->id }}"
-                                            name="total_biaya"
+                                            class="form-control @error('odometer_awal') is-invalid @enderror"
+                                            id="odometer-awal-{{ $reservasi->id }}"
+                                            name="odometer_awal"
                                             min="0"
-                                            step="any"
-                                            value="{{ old('total_biaya', $servis?->total_biaya ?? 0) }}">
-                                        <div class="form-text">Biaya ini masuk ke pendapatan servis di dashboard.</div>
-                                        @error('total_biaya')
+                                            max="9999999"
+                                            step="1"
+                                            value="{{ old('odometer_awal', $reservasi->kendaraan?->odometer_terakhir ?: $reservasi->kendaraan?->kilometer) }}"
+                                            inputmode="numeric"
+                                            required>
+                                        <div class="form-text">
+                                            Odometer terakhir tercatat:
+                                            {{ $reservasi->kendaraan?->odometer_terakhir !== null
+                                                ? number_format($reservasi->kendaraan->odometer_terakhir, 0, ',', '.').' km'
+                                                : '-' }}
+                                        </div>
+                                        @error('odometer_awal')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -642,11 +615,23 @@
                             </form>
                         @elseif ($statusValue === 'menunggu_konfirmasi')
                             <p class="small text-body-secondary mb-0">
-                                Konfirmasi reservasi terlebih dahulu sebelum menandai servis selesai.
+                                Konfirmasi reservasi terlebih dahulu sebelum melakukan check in kendaraan.
                             </p>
-                        @elseif ($statusValue === 'dikonfirmasi')
+                        @elseif ($statusValue === 'dikonfirmasi' && $servis)
                             <p class="small text-body-secondary mb-0">
-                                Servis untuk reservasi ini sudah selesai atau dibatalkan.
+                                Reservasi ini sudah memiliki data servis. Kelola status pengerjaan melalui menu Servis.
+                            </p>
+                        @elseif ($statusValue === 'check_in' && $servis)
+                            <p class="small text-body-secondary mb-0">
+                                Kendaraan sudah check in. Perbarui catatan dan status servis melalui menu Servis.
+                            </p>
+                        @elseif ($statusValue === 'selesai')
+                            <p class="small text-body-secondary mb-0">
+                                Servis sudah diambil dan reservasi telah selesai.
+                            </p>
+                        @elseif ($statusValue === 'dibatalkan')
+                            <p class="small text-body-secondary mb-0">
+                                Reservasi dibatalkan sehingga tidak diproses sebagai servis.
                             </p>
                         @endif
                     </div>
@@ -788,12 +773,12 @@
                             </button>
                         </form>
                     @endif
-                    @if ($canFinish)
+                    @if ($canCheckIn)
                         <button
                             type="submit"
-                            form="form-selesaikan-servis-{{ $reservasi->id }}"
-                            class="btn btn-success">
-                            <i class="icon-base bx bx-check-circle me-1" aria-hidden="true"></i>Selesaikan Servis
+                            form="form-check-in-{{ $reservasi->id }}"
+                            class="btn btn-primary">
+                            <i class="icon-base bx bx-log-in-circle me-1" aria-hidden="true"></i>Check In Kendaraan
                         </button>
                     @endif
                 </div>

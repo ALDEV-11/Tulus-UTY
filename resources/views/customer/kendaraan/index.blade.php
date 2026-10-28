@@ -51,6 +51,9 @@
               </div>
 
               <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('riwayat-servis.index', ['kendaraan' => $kendaraan->id]) }}" class="btn btn-sm btn-outline-primary">
+                  <i class="icon-base bx bx-history me-1" aria-hidden="true"></i>Riwayat Servis
+                </a>
                 <a href="{{ route('kendaraan.edit', $kendaraan) }}" class="btn btn-sm btn-outline-primary">
                   <i class="icon-base bx bx-edit-alt me-1" aria-hidden="true"></i>Edit
                 </a>

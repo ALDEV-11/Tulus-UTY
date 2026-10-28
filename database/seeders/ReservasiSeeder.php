@@ -21,7 +21,7 @@ class ReservasiSeeder extends Seeder
 
         $reservasi1 = Reservasi::create([
             'user_id' => $pelanggan->id, 'kendaraan_id' => $kendaraan1->id, 'id_slot' => $slots[1]->id,
-            'kode' => 'RSV-DEMO-001', 'status' => StatusReservasi::Dikonfirmasi,
+            'kode' => 'RSV-DEMO-001', 'status' => StatusReservasi::CheckIn,
             'keluhan' => 'Mesin terasa kurang responsif',
         ]);
         $reservasi1->layanan()->attach([

@@ -18,8 +18,7 @@ class DashboardController extends Controller
 {
     public function __construct(
         private SlotAvailabilityService $slotAvailability,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
@@ -45,15 +44,17 @@ class DashboardController extends Controller
 
         $ringkasan = [
             'reservasi_aktif' => (clone $reservasiQuery)->aktif()->count(),
+            'servis_berlangsung' => (clone $servisQuery)
+                ->whereIn('status', [StatusServis::Menunggu->value, StatusServis::Dikerjakan->value])
+                ->count(),
             'servis_selesai' => (clone $servisQuery)
-                ->where('status', StatusServis::Selesai->value)
+                ->whereIn('status', [StatusServis::Selesai->value, StatusServis::Diambil->value])
                 ->count(),
             'kendaraan' => $user->kendaraan()->count(),
-            'total_biaya_servis' => (float) (clone $servisQuery)->sum('total_biaya'),
         ];
 
         $servisTerakhir = (clone $servisQuery)
-            ->with(['kendaraan.merk', 'mekanik'])
+            ->with(['kendaraan.merk', 'reservasi.layanan', 'mekanik'])
             ->orderByDesc('tanggal_masuk')
             ->orderByDesc('id')
             ->limit(5)
@@ -90,7 +91,7 @@ class DashboardController extends Controller
             'requestedSlotId' => $requestedSlotId > 0 ? $requestedSlotId : null,
             'requestedSlotUnavailable' => $requestedSlotUnavailable,
             'reservasiSaya' => (clone $reservasiQuery)
-                ->with(['kendaraan.merk', 'slot', 'layanan'])
+                ->with(['kendaraan.merk', 'slot', 'layanan', 'servis'])
                 ->latest()
                 ->paginate(10, ['*'], 'reservasi_page')
                 ->withQueryString(),
