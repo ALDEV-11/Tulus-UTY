@@ -6,26 +6,18 @@
 @include('admin.partials.page-header', [
     'title' => 'Merk Motor',
     'subtitle' => $merks->total().' merk terdaftar untuk kendaraan pelanggan.',
-    'icon' => 'bx bx-car',
+    'icon' => 'bx bx-motorcycle',
     'actionModal' => 'modalTambahMerk',
     'actionLabel' => 'Tambah Merk',
     'actionIcon' => 'bx bx-plus',
 ])
 
-<div class="card admin-table">
-    <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 py-4">
-        <div class="d-flex align-items-center gap-3">
-            <div class="avatar flex-shrink-0">
-                <span class="avatar-initial rounded-circle bg-label-info">
-                    <i class="icon-base bx bx-car" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div>
-                <h5 class="mb-0">Daftar Merk</h5>
-                <small class="text-body-secondary">Kelola merk motor yang tersedia</small>
-            </div>
-        </div>
-    </div>
+<div class="card app-table-card">
+    <x-ui.card-header
+        title="Daftar Merk"
+        subtitle="Kelola merk motor yang tersedia"
+        icon="bx bx-motorcycle"
+        color="info" />
 
     <div class="table-responsive">
         <table class="table align-middle mb-0">
@@ -93,23 +85,22 @@
                 @empty
                     <tr>
                         <td colspan="4">
-                            <div class="text-center py-8">
-                                <div class="avatar avatar-lg mb-3">
-                                    <span class="avatar-initial rounded-circle bg-label-info">
-                                        <i class="icon-base bx bx-car icon-lg" aria-hidden="true"></i>
-                                    </span>
-                                </div>
-                                <h6 class="mb-1">Belum ada merk motor</h6>
-                                <p class="text-body-secondary mb-4">Tambahkan merk pertama agar data kendaraan bisa dikelompokkan.</p>
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-primary"
-                                    id="btn-tambah-merk-empty"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalTambahMerk">
-                                    <i class="icon-base bx bx-plus me-1" aria-hidden="true"></i>Tambah Merk
-                                </button>
-                            </div>
+                            <x-ui.empty-state
+                                title="Belum ada merk motor"
+                                description="Tambahkan merk pertama agar data kendaraan bisa dikelompokkan."
+                                icon="bx bx-motorcycle"
+                                color="info">
+                                <x-slot:action>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-primary"
+                                        id="btn-tambah-merk-empty"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalTambahMerk">
+                                        <i class="icon-base bx bx-plus me-1" aria-hidden="true"></i>Tambah Merk
+                                    </button>
+                                </x-slot:action>
+                            </x-ui.empty-state>
                         </td>
                     </tr>
                 @endforelse

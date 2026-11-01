@@ -27,7 +27,7 @@
 
         <li class="menu-item {{ $activeMenu === 'kendaraan' ? 'active' : '' }}">
             <a href="{{ route('kendaraan.index') }}" class="menu-link" @if ($activeMenu === 'kendaraan') aria-current="page" @endif>
-                <i class="menu-icon tf-icons bx bx-cycling" aria-hidden="true"></i>
+                <i class="menu-icon tf-icons bx bx-motorcycle" aria-hidden="true"></i>
                 <div class="text-truncate">Kendaraan Saya</div>
             </a>
         </li>

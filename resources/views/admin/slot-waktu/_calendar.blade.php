@@ -6,20 +6,12 @@
 @endphp
 
 <div class="card slot-calendar-card mb-6">
-    <div class="card-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 py-4">
-        <div class="d-flex align-items-center gap-3">
-            <div class="avatar flex-shrink-0">
-                <span class="avatar-initial rounded-circle bg-label-warning">
-                    <i class="icon-base bx bx-calendar" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div>
-                <h5 class="mb-0">{{ $month->translatedFormat('F Y') }}</h5>
-                <small class="text-body-secondary">Klik tanggal untuk melihat dan mengelola slot.</small>
-            </div>
-        </div>
-
-        <div class="d-flex flex-wrap align-items-center gap-2">
+    <x-ui.card-header
+        :title="$month->translatedFormat('F Y')"
+        subtitle="Klik tanggal untuk melihat dan mengelola slot."
+        icon="bx bx-calendar"
+        color="warning">
+        <x-slot:actions>
             <a
                 href="{{ route('admin.slot-waktu.index', ['bulan' => $prevBulan]) }}"
                 class="btn btn-sm btn-icon btn-outline-secondary"
@@ -39,10 +31,10 @@
                 title="Bulan berikutnya">
                 <i class="icon-base bx bx-chevron-right" aria-hidden="true"></i>
             </a>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.card-header>
 
-    <div class="card-body pt-0">
+    <div class="card-body">
         <div class="d-flex flex-wrap gap-2 mb-4">
             <span class="badge bg-label-primary">{{ $monthSummary['total'] }} slot</span>
             <span class="badge bg-label-success">{{ $monthSummary['tersedia'] }} tersedia</span>

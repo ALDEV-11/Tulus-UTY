@@ -1,15 +1,18 @@
 @php
     $canBookOnline = ! auth()->check() || auth()->user()->role->value === 'pelanggan';
+    $showHeading = $showHeading ?? true;
 @endphp
 
 <div class="row justify-content-center">
   <div class="col-12 col-lg-10">
-    <div class="text-center mb-6">
-      <h1 class="mb-2">Cek Slot Servis</h1>
-      <p class="text-body-secondary mb-0">
-        Pilih tanggal untuk melihat ketersediaan jam servis motor.
-      </p>
-    </div>
+    @if ($showHeading)
+      <div class="text-center mb-6">
+        <h1 class="mb-2">Cek Slot Servis</h1>
+        <p class="text-body-secondary mb-0">
+          Pilih tanggal untuk melihat ketersediaan jam servis motor.
+        </p>
+      </div>
+    @endif
 
     @if ($error)
       <div class="alert alert-danger" role="alert">

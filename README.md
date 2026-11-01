@@ -65,7 +65,7 @@ Pengecekan role di Blade hanya menyembunyikan menu agar UX sesuai role; otorisas
 dilakukan di server. Request yang dimanipulasi tetap diblokir oleh middleware dan Policy.
 
 View autentikasi berada di `resources/views/222` (nama folder sengaja tidak memakai nama
-standar). Login dan register ditulis sebagai halaman mandiri, sedangkan halaman password
+standar). Login ditulis sebagai halaman mandiri, sedangkan register dan halaman password
 memakai partial `222/partials/head.blade.php` dan `222/partials/foot.blade.php`.
 
 ### Tujuh skenario uji Remember Me

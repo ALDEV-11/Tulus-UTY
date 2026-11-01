@@ -1,29 +1,21 @@
 <div id="slot-tanggal" class="card slot-day-panel">
     @if ($selectedDate)
-        <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 py-4">
-            <div class="d-flex align-items-center gap-3">
-                <div class="avatar flex-shrink-0">
-                    <span class="avatar-initial rounded-circle bg-label-primary">
-                        <i class="icon-base bx bx-calendar-check" aria-hidden="true"></i>
-                    </span>
-                </div>
-                <div>
-                    <h5 class="mb-0">{{ $selectedDate->translatedFormat('l, d F Y') }}</h5>
-                    <small class="text-body-secondary">{{ $daySummary['total'] }} slot pada tanggal ini</small>
-                </div>
-            </div>
-
-            <div class="d-flex flex-wrap align-items-center gap-2">
+        <x-ui.card-header
+            :title="$selectedDate->translatedFormat('l, d F Y')"
+            :subtitle="$daySummary['total'].' slot pada tanggal ini'"
+            icon="bx bx-calendar-check"
+            color="primary">
+            <x-slot:actions>
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuatSlot">
                     <i class="icon-base bx bx-plus me-1" aria-hidden="true"></i>Tambah Slot
                 </button>
                 <a href="{{ route('admin.slot-waktu.index', ['bulan' => $bulan]) }}" class="btn btn-sm btn-outline-secondary">
                     Tutup
                 </a>
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-ui.card-header>
 
-        <div class="card-body pt-0">
+        <div class="card-body">
             <div class="d-flex flex-wrap gap-2 mb-3">
                 <span class="badge bg-label-success">{{ $daySummary['tersedia'] }} tersedia</span>
                 <span class="badge bg-label-warning">{{ $daySummary['sebagian'] }} sebagian</span>
@@ -116,29 +108,26 @@
                     @endforeach
                 </div>
             @else
-                <div class="text-center py-8">
-                    <div class="avatar avatar-lg mx-auto mb-3">
-                        <span class="avatar-initial rounded-circle bg-label-warning">
-                            <i class="icon-base bx bx-calendar-x icon-lg" aria-hidden="true"></i>
-                        </span>
-                    </div>
-                    <h6 class="mb-1">Belum ada slot pada tanggal ini</h6>
-                    <p class="text-body-secondary mb-4">Buat slot untuk tanggal {{ $selectedDate->translatedFormat('d F Y') }}.</p>
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuatSlot">
-                        <i class="icon-base bx bx-calendar-plus me-1" aria-hidden="true"></i>Buat Slot untuk Tanggal Ini
-                    </button>
-                </div>
+                <x-ui.empty-state
+                    title="Belum ada slot pada tanggal ini"
+                    :description="'Buat slot untuk tanggal '.$selectedDate->translatedFormat('d F Y').'.'"
+                    icon="bx bx-calendar-x"
+                    color="warning">
+                    <x-slot:action>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuatSlot">
+                            <i class="icon-base bx bx-calendar-plus me-1" aria-hidden="true"></i>Buat Slot untuk Tanggal Ini
+                        </button>
+                    </x-slot:action>
+                </x-ui.empty-state>
             @endif
         </div>
     @else
-        <div class="card-body text-center py-8">
-            <div class="avatar avatar-lg mx-auto mb-3">
-                <span class="avatar-initial rounded-circle bg-label-primary">
-                    <i class="icon-base bx bx-calendar-event icon-lg" aria-hidden="true"></i>
-                </span>
-            </div>
-            <h6 class="mb-1">Pilih tanggal</h6>
-            <p class="text-body-secondary mb-0">Klik salah satu tanggal di kalender untuk melihat dan mengelola slot.</p>
+        <div class="card-body">
+            <x-ui.empty-state
+                title="Pilih tanggal"
+                description="Klik salah satu tanggal di kalender untuk melihat dan mengelola slot."
+                icon="bx bx-calendar-event"
+                color="primary" />
         </div>
     @endif
 </div>

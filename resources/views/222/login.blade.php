@@ -211,5 +211,6 @@
 
     <!-- Place this tag before closing body tag for github widget button. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    @include('partials.sweetalert')
   </body>
 </html>

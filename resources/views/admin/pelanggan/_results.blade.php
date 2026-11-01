@@ -117,23 +117,25 @@
             @empty
                 <tr>
                     <td colspan="6">
-                        <div class="text-center py-8">
-                            @if ($search === '')
-                                <div class="avatar avatar-lg mb-3">
-                                    <span class="avatar-initial rounded-circle bg-label-success">
-                                        <i class="icon-base bx bx-group icon-lg" aria-hidden="true"></i>
-                                    </span>
-                                </div>
-                                <h6 class="mb-1">Belum ada pelanggan</h6>
-                                <p class="text-body-secondary mb-4">Pelanggan akan muncul di sini setelah mendaftar melalui halaman registrasi.</p>
-                            @else
-                                <h6 class="mb-1">Pelanggan tidak ditemukan</h6>
-                                <p class="text-body-secondary mb-4">Tidak ada hasil untuk "{{ $search }}". Coba kata kunci lain.</p>
-                                <a href="{{ route('admin.pelanggan.index') }}" class="btn btn-sm btn-outline-secondary" id="btn-hapus-pencarian" data-reset-search>
-                                    <i class="icon-base bx bx-x me-1" aria-hidden="true"></i>Hapus pencarian
-                                </a>
-                            @endif
-                        </div>
+                        @if ($search === '')
+                            <x-ui.empty-state
+                                title="Belum ada pelanggan"
+                                description="Pelanggan akan muncul di sini setelah mendaftar melalui halaman registrasi."
+                                icon="bx bx-group"
+                                color="success" />
+                        @else
+                            <x-ui.empty-state
+                                title="Pelanggan tidak ditemukan"
+                                :description="'Tidak ada hasil untuk '.$search.'. Coba kata kunci lain.'"
+                                icon="bx bx-search-alt"
+                                color="secondary">
+                                <x-slot:action>
+                                    <a href="{{ route('admin.pelanggan.index') }}" class="btn btn-sm btn-outline-secondary" data-live-search-reset>
+                                        <i class="icon-base bx bx-x me-1" aria-hidden="true"></i>Hapus pencarian
+                                    </a>
+                                </x-slot:action>
+                            </x-ui.empty-state>
+                        @endif
                     </td>
                 </tr>
             @endforelse

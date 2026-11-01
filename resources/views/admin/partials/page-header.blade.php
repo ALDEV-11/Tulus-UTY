@@ -15,7 +15,7 @@
     </ol>
 </nav>
 
-<div class="admin-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-6">
+<div class="admin-page-header app-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-6">
     <div>
         <h4 class="fw-bold mb-1">{{ $title }}</h4>
         <p class="text-body-secondary mb-0"@isset($subtitleId) id="{{ $subtitleId }}"@endisset>{{ $subtitle }}</p>

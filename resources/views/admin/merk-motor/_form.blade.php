@@ -14,7 +14,7 @@
             Nama merk <span class="text-danger" aria-hidden="true">*</span>
         </label>
         <div class="input-group input-group-merge">
-            <span class="input-group-text"><i class="icon-base bx bx-car" aria-hidden="true"></i></span>
+            <span class="input-group-text"><i class="icon-base bx bx-motorcycle" aria-hidden="true"></i></span>
             <input
                 type="text"
                 id="{{ $fieldId('nama') }}"

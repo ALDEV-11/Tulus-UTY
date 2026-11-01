@@ -15,23 +15,6 @@
 
 @push('styles')
 <style>
-    .service-status-card {
-        transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
-    }
-
-    .service-status-card:hover,
-    .service-status-card:focus-visible {
-        border-color: var(--bs-primary);
-        box-shadow: 0 .25rem .75rem rgba(105, 108, 255, .18);
-        transform: translateY(-1px);
-        outline: 0;
-    }
-
-    .service-status-card.is-active {
-        border-color: var(--bs-primary);
-        box-shadow: inset 0 0 0 1px var(--bs-primary);
-    }
-
     .service-detail-label {
         color: var(--bs-secondary-color);
         font-size: .75rem;
@@ -42,12 +25,6 @@
     .service-detail-value {
         font-weight: 600;
     }
-
-    @media (prefers-reduced-motion: reduce) {
-        .service-status-card {
-            transition: none;
-        }
-    }
 </style>
 @endpush
 
@@ -56,101 +33,74 @@
 @include('admin.partials.page-header', [
     'title' => 'Servis',
     'subtitle' => $subtitle,
+    'subtitleId' => 'servis-subtitle',
     'icon' => 'bx bx-wrench',
 ])
 
-<div class="row g-3 mb-4">
-    @foreach ($statusLabels as $statusValue => $statusLabel)
-        @php
-            $isActive = $status === $statusValue;
-            $filterUrl = route('admin.servis.index', ['status' => $statusValue]);
-        @endphp
-        <div class="col-6 col-xl-3">
-            <a href="{{ $filterUrl }}"
-               class="card h-100 text-decoration-none service-status-card {{ $isActive ? 'is-active' : '' }}"
-               @if ($isActive) aria-current="true" @endif>
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between gap-3">
-                        <div>
-                            <p class="text-body-secondary mb-1">{{ $statusLabel }}</p>
-                            <h3 class="mb-0">{{ number_format($statusCounts[$statusValue] ?? 0, 0, ',', '.') }}</h3>
-                        </div>
-                        <span class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded-circle bg-label-{{ $statusBadges[$statusValue] ?? 'secondary' }}">
-                                <i class="icon-base {{ $statusIcons[$statusValue] ?? 'bx bx-wrench' }}" aria-hidden="true"></i>
-                            </span>
-                        </span>
+<div class="card app-table-card">
+    <x-ui.card-header
+        title="Daftar Servis"
+        subtitle="Pantau antrean, pekerjaan, dan pengambilan kendaraan"
+        icon="bx bx-wrench"
+        color="primary">
+        <x-slot:actions>
+            <a href="{{ route('admin.servis.index') }}"
+               class="btn btn-sm btn-outline-secondary {{ $filterActive ? '' : 'd-none' }}"
+               data-live-search-reset>
+                <i class="icon-base bx bx-reset me-1" aria-hidden="true"></i>Reset
+            </a>
+        </x-slot:actions>
+
+        <x-slot:toolbar>
+            <form method="GET" action="{{ route('admin.servis.index') }}"
+                  class="row g-2 align-items-end"
+                  role="search"
+                  data-live-search-form
+                  data-live-search-targets="#servis-results,#servis-detail-modals"
+                  data-live-search-subtitle="#servis-subtitle">
+                <div class="col-12 col-lg-4">
+                    <label class="form-label" for="q">Cari servis</label>
+                    <div class="input-group input-group-merge" data-live-search-group>
+                        <span class="input-group-text" data-live-search-icon><i class="icon-base bx bx-search" aria-hidden="true"></i></span>
+                        <input
+                            type="search"
+                            class="form-control"
+                            id="q"
+                            name="q"
+                            value="{{ $search }}"
+                            placeholder="Kode, nama, nomor HP, atau plat nomor"
+                            maxlength="100"
+                            autocomplete="off"
+                            data-live-search-input>
                     </div>
                 </div>
-            </a>
-        </div>
-    @endforeach
-</div>
-
-<div class="card admin-table">
-    <div class="card-header py-4">
-        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <div class="avatar flex-shrink-0">
-                    <span class="avatar-initial rounded-circle bg-label-primary">
-                        <i class="icon-base bx bx-wrench" aria-hidden="true"></i>
-                    </span>
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Semua status</option>
+                        @foreach ($statusLabels as $statusValue => $statusLabel)
+                            <option value="{{ $statusValue }}" @selected($status === $statusValue)>{{ $statusLabel }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div>
-                    <h5 class="mb-0">Daftar Servis</h5>
-                    <small class="text-body-secondary">Pantau antrean, pekerjaan, dan pengambilan kendaraan</small>
+                <div class="col-6 col-sm-6 col-lg-2">
+                    <label class="form-label" for="dari">Dari tanggal</label>
+                    <input type="date" class="form-control" id="dari" name="dari" value="{{ $dari }}">
                 </div>
-            </div>
-            @if ($filterActive)
-                <a href="{{ route('admin.servis.index') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="icon-base bx bx-reset me-1" aria-hidden="true"></i>Reset Filter
-                </a>
-            @endif
-        </div>
-    </div>
-
-    <div class="card-body border-bottom py-3">
-        <form method="GET" action="{{ route('admin.servis.index') }}" class="row g-2 align-items-end" role="search">
-            <div class="col-12 col-lg-4">
-                <label class="form-label" for="q">Cari servis</label>
-                <div class="input-group input-group-merge">
-                    <span class="input-group-text"><i class="icon-base bx bx-search" aria-hidden="true"></i></span>
-                    <input
-                        type="search"
-                        class="form-control"
-                        id="q"
-                        name="q"
-                        value="{{ $search }}"
-                        placeholder="Kode reservasi, nama, nomor HP, atau plat nomor"
-                        maxlength="100"
-                        autocomplete="off">
+                <div class="col-6 col-sm-6 col-lg-2">
+                    <label class="form-label" for="sampai">Sampai tanggal</label>
+                    <input type="date" class="form-control" id="sampai" name="sampai" value="{{ $sampai }}">
                 </div>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-2">
-                <label class="form-label" for="status">Status</label>
-                <select class="form-select" id="status" name="status">
-                    <option value="">Semua status</option>
-                    @foreach ($statusLabels as $statusValue => $statusLabel)
-                        <option value="{{ $statusValue }}" @selected($status === $statusValue)>{{ $statusLabel }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-6 col-sm-3 col-lg-2">
-                <label class="form-label" for="dari">Dari tanggal</label>
-                <input type="date" class="form-control" id="dari" name="dari" value="{{ $dari }}">
-            </div>
-            <div class="col-6 col-sm-3 col-lg-2">
-                <label class="form-label" for="sampai">Sampai tanggal</label>
-                <input type="date" class="form-control" id="sampai" name="sampai" value="{{ $sampai }}">
-            </div>
-            <div class="col-12 col-lg-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-fill">
-                    <i class="icon-base bx bx-filter-alt me-1" aria-hidden="true"></i>Filter
-                </button>
-            </div>
-        </form>
-    </div>
+                <div class="col-12 col-lg-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="icon-base bx bx-search me-1" aria-hidden="true"></i>Cari
+                    </button>
+                </div>
+            </form>
+        </x-slot:toolbar>
+    </x-ui.card-header>
 
+    <div id="servis-results" class="live-search-results">
     <div class="table-responsive">
         <table class="table align-middle mb-0">
             <caption class="visually-hidden">Daftar servis beserta reservasi, pelanggan, kendaraan, odometer, dan status pengerjaannya</caption>
@@ -243,19 +193,21 @@
                 @empty
                     <tr>
                         <td colspan="7">
-                            <div class="text-center py-8">
-                                <div class="avatar avatar-lg mb-3">
-                                    <span class="avatar-initial rounded-circle bg-label-primary">
-                                        <i class="icon-base bx bx-wrench icon-lg" aria-hidden="true"></i>
-                                    </span>
-                                </div>
-                                <h6 class="mb-1">{{ $filterActive ? 'Tidak ada servis yang cocok' : 'Belum ada servis' }}</h6>
-                                <p class="text-body-secondary mb-0">
-                                    {{ $filterActive
-                                        ? 'Coba ubah kata kunci, status, atau rentang tanggal.'
-                                        : 'Lakukan check in reservasi yang sudah dikonfirmasi agar kendaraan masuk antrean servis.' }}
-                                </p>
-                            </div>
+                            <x-ui.empty-state
+                                :title="$filterActive ? 'Tidak ada servis yang cocok' : 'Belum ada servis'"
+                                :description="$filterActive
+                                    ? 'Coba ubah kata kunci, status, atau rentang tanggal.'
+                                    : 'Lakukan check in reservasi yang sudah dikonfirmasi agar kendaraan masuk antrean servis.'"
+                                icon="bx bx-wrench"
+                                color="primary">
+                                @if (! $filterActive)
+                                    <x-slot:action>
+                                        <a href="{{ route('admin.reservasi.index') }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="icon-base bx bx-calendar-check me-1" aria-hidden="true"></i>Lihat Reservasi
+                                        </a>
+                                    </x-slot:action>
+                                @endif
+                            </x-ui.empty-state>
                         </td>
                     </tr>
                 @endforelse
@@ -273,8 +225,10 @@
             @endif
         </div>
     @endif
+    </div>
 </div>
 
+<div id="servis-detail-modals">
 @foreach ($servis as $item)
     @php
         $serviceStatus = $item->status;
@@ -310,14 +264,14 @@
                     @enderror
 
                     <div class="border rounded p-3 mb-4">
-                        <h6 class="mb-3"><i class="icon-base bx bx-git-commit me-2 text-primary" aria-hidden="true"></i>Progres Servis</h6>
+                        <h6 class="mb-3">Progres Servis</h6>
                         @include('partials.service-timeline', ['servis' => $item])
                     </div>
 
                     <div class="row g-4">
                         <div class="col-12 col-lg-6">
                             <div class="border rounded p-3 h-100">
-                                <h6 class="mb-3"><i class="icon-base bx bx-user me-2 text-primary" aria-hidden="true"></i>Pelanggan</h6>
+                                <h6 class="mb-3">Pelanggan</h6>
                                 <div class="mb-2">
                                     <div class="service-detail-label">Nama</div>
                                     <div class="service-detail-value">{{ $item->reservasi?->pelanggan?->name ?? '-' }}</div>
@@ -335,7 +289,7 @@
 
                         <div class="col-12 col-lg-6">
                             <div class="border rounded p-3 h-100">
-                                <h6 class="mb-3"><i class="icon-base bx bx-car me-2 text-primary" aria-hidden="true"></i>Kendaraan</h6>
+                                <h6 class="mb-3">Kendaraan</h6>
                                 <div class="mb-2">
                                     <div class="service-detail-label">Plat nomor</div>
                                     <div class="service-detail-value">{{ $item->kendaraan?->plat_nomor ?? '-' }}</div>
@@ -359,7 +313,7 @@
 
                         <div class="col-12 col-lg-6">
                             <div class="border rounded p-3 h-100">
-                                <h6 class="mb-3"><i class="icon-base bx bx-calendar me-2 text-primary" aria-hidden="true"></i>Waktu Servis</h6>
+                                <h6 class="mb-3">Waktu Servis</h6>
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <div class="service-detail-label">Tanggal masuk</div>
@@ -383,7 +337,7 @@
 
                         <div class="col-12 col-lg-6">
                             <div class="border rounded p-3 h-100">
-                                <h6 class="mb-3"><i class="icon-base bx bx-wrench me-2 text-primary" aria-hidden="true"></i>Layanan</h6>
+                                <h6 class="mb-3">Layanan</h6>
                                 @forelse ($item->reservasi?->layanan ?? [] as $layanan)
                                     <div class="d-flex justify-content-between gap-3 py-2 {{ $loop->last ? '' : 'border-bottom' }}">
                                         <span>{{ $layanan->nama }}</span>
@@ -397,7 +351,7 @@
                     </div>
 
                     <div class="border rounded p-3 mt-4">
-                        <h6 class="mb-1"><i class="icon-base bx bx-note me-2 text-primary" aria-hidden="true"></i>Catatan Pengerjaan</h6>
+                        <h6 class="mb-1">Catatan Pengerjaan</h6>
                         <p class="small text-body-secondary mb-3">
                             Isi odometer, rincian pekerjaan, dan catatan tambahan untuk pelanggan.
                         </p>
@@ -498,6 +452,7 @@
         </div>
     </div>
 @endforeach
+</div>
 
 @include('admin.partials.modal-auto-open')
 

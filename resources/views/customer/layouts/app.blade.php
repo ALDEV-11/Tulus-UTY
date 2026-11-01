@@ -27,6 +27,7 @@
 
     <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/vendor/css/core.css') }}" />
     <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/css/demo.css') }}" />
+    <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/css/app-ui.css') }}" />
 
     <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 
@@ -50,24 +51,6 @@
 
           <div class="content-wrapper">
             <div class="container-xxl flex-grow-1 container-p-y">
-              @if (session('status'))
-                <div class="alert alert-success alert-dismissible fade show" role="status">
-                  {{ session('status') }}
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-                </div>
-              @endif
-
-              @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                  <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                      <li>{{ $error }}</li>
-                    @endforeach
-                  </ul>
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-                </div>
-              @endif
-
               @yield('content')
             </div>
 
@@ -88,6 +71,7 @@
     <script src="{{ asset('dist-dashboard/assets/vendor/js/menu.js') }}"></script>
     <script src="{{ asset('dist-dashboard/assets/js/main.js') }}"></script>
 
+    @include('partials.sweetalert')
     @stack('scripts')
   </body>
 </html>

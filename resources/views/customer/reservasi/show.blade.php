@@ -24,15 +24,12 @@
     $statusBadge = $alasanPenolakan ? 'danger' : ($statusBadges[$statusValue] ?? 'secondary');
   @endphp
 
-  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-6">
-    <div>
-      <h4 class="mb-1">Detail Reservasi</h4>
-      <p class="text-body-secondary mb-0">Kode Booking {{ $reservasi->kode }}</p>
-    </div>
-    <a href="{{ route('booking-saya') }}" class="btn btn-outline-secondary">
-      <i class="icon-base bx bx-arrow-back me-1" aria-hidden="true"></i>Kembali ke Booking Saya
-    </a>
-  </div>
+  @include('customer.partials.page-header', [
+    'title' => 'Detail Reservasi',
+    'subtitle' => 'Kode Booking '.$reservasi->kode,
+    'backRoute' => route('booking-saya'),
+    'backLabel' => 'Kembali ke Booking Saya',
+  ])
 
   @if ($alasanPenolakan)
     <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
@@ -47,10 +44,15 @@
   <div class="row g-4">
     <div class="col-12 col-lg-8">
       <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center gap-3">
-          <h5 class="mb-0">Informasi Reservasi</h5>
-          <span class="badge bg-label-{{ $statusBadge }}">{{ $statusLabel }}</span>
-        </div>
+        <x-ui.card-header
+          title="Informasi Reservasi"
+          subtitle="Ringkasan jadwal dan kendaraan"
+          icon="bx bx-calendar-check"
+          color="primary">
+          <x-slot:actions>
+            <span class="badge bg-label-{{ $statusBadge }}">{{ $statusLabel }}</span>
+          </x-slot:actions>
+        </x-ui.card-header>
         <div class="card-body">
           <dl class="row mb-0">
             <dt class="col-sm-4">Kode Booking</dt>
@@ -82,9 +84,11 @@
       </div>
 
       <div class="card mt-4">
-        <div class="card-header">
-          <h5 class="mb-0">Layanan</h5>
-        </div>
+        <x-ui.card-header
+          title="Layanan"
+          subtitle="Layanan yang dipilih saat reservasi"
+          icon="bx bx-wrench"
+          color="info" />
         <div class="card-body">
           @if ($reservasi->layanan->isEmpty())
             <p class="text-body-secondary mb-0">Belum ada layanan yang dipilih.</p>
@@ -106,15 +110,17 @@
 
       @if ($reservasi->servis)
         <div class="card mt-4">
-          <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
-            <div>
-              <h5 class="mb-1">Progres Servis</h5>
-              <p class="card-subtitle mb-0">Posisi kendaraan Anda saat ini.</p>
-            </div>
-            <span class="badge bg-label-{{ $reservasi->servis->status->badge() }}">
-              {{ $reservasi->servis->status->label() }}
-            </span>
-          </div>
+          <x-ui.card-header
+            title="Progres Servis"
+            subtitle="Posisi kendaraan Anda saat ini."
+            icon="bx bx-wrench"
+            color="primary">
+            <x-slot:actions>
+              <span class="badge bg-label-{{ $reservasi->servis->status->badge() }}">
+                {{ $reservasi->servis->status->label() }}
+              </span>
+            </x-slot:actions>
+          </x-ui.card-header>
           <div class="card-body">
             @include('partials.service-timeline', ['servis' => $reservasi->servis])
 
@@ -167,8 +173,12 @@
 
     <div class="col-12 col-lg-4">
       <div class="card">
+        <x-ui.card-header
+          title="Status Reservasi"
+          subtitle="Status dan tindakan"
+          icon="bx bx-info-circle"
+          color="secondary" />
         <div class="card-body">
-          <h6 class="mb-3">Status Reservasi</h6>
           <span class="badge bg-label-{{ $statusBadge }} mb-3">{{ $statusLabel }}</span>
 
           @if ($reservasi->servis)

@@ -6,48 +6,25 @@
 <div class="card h-100 total-revenue">
     <div class="row row-bordered g-0">
         <div class="col-lg-8">
-            <div class="card-header d-flex align-items-center justify-content-between gap-3">
-                <div class="card-title mb-0">
-                    <h5 class="m-0 me-2">Total Pendapatan</h5>
-                    <p class="card-subtitle mb-0">
-                        Pendapatan servis {{ $chartTotalRevenue['year'] }} vs {{ $chartTotalRevenue['previous_year'] }}
-                    </p>
-                </div>
-                <div class="dropdown">
-                    <button
-                        class="btn btn-sm btn-outline-primary dropdown-toggle"
-                        type="button"
-                        id="tahun-{{ $chartId }}"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        {{ $chartTotalRevenue['year'] }}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tahun-{{ $chartId }}">
-                        @foreach ($chartTotalRevenue['available_years'] as $year)
-                            <li>
-                                <a
-                                    class="dropdown-item {{ $year === $chartTotalRevenue['year'] ? 'active' : '' }}"
-                                    href="{{ request()->fullUrlWithQuery(['tahun' => $year]) }}"
-                                    @if ($year === $chartTotalRevenue['year']) aria-current="page" @endif>
-                                    {{ $year }}
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
+            <x-ui.card-header
+                title="Total Pendapatan"
+                subtitle="Pendapatan servis {{ $chartTotalRevenue['current_month_label'] }} vs {{ $chartTotalRevenue['previous_month_label'] }}"
+                icon="bx bx-dollar-circle"
+                color="success">
+            </x-ui.card-header>
 
             @if ($chartTotalRevenue['has_data'])
                 <div
                     id="{{ $chartId }}"
                     class="px-3 dashboard-chart"
                     role="img"
-                    aria-label="Grafik total pendapatan servis {{ $chartTotalRevenue['year'] }} dan {{ $chartTotalRevenue['previous_year'] }}"></div>
+                    aria-label="Grafik total pendapatan servis {{ $chartTotalRevenue['current_month_label'] }} dan {{ $chartTotalRevenue['previous_month_label'] }}"></div>
             @else
-                <div class="text-center text-body-secondary py-8">
-                    <i class="icon-base bx bx-bar-chart-alt-2 icon-lg mb-2" aria-hidden="true"></i>
-                    <p class="mb-0">Belum ada data pendapatan servis.</p>
-                </div>
+                <x-ui.empty-state
+                    title="Belum ada data pendapatan"
+                    description="Data pendapatan akan muncul setelah servis selesai."
+                    icon="bx bx-bar-chart-alt-2"
+                    color="success" />
             @endif
         </div>
 
@@ -55,14 +32,14 @@
             <div class="card-body px-xl-5 py-12 d-flex align-items-center flex-column">
                 <div class="text-center mb-6">
                     <span class="badge bg-label-primary">
-                        {{ $chartTotalRevenue['period_label'] }} {{ $chartTotalRevenue['year'] }}
+                        {{ $chartTotalRevenue['current_month_label'] }}
                     </span>
                 </div>
 
                 <div
                     id="{{ $growthId }}"
                     role="img"
-                    aria-label="Pertumbuhan pendapatan {{ $chartTotalRevenue['period_label'] }} {{ $chartTotalRevenue['year'] }} dibanding {{ $chartTotalRevenue['previous_year'] }}"></div>
+                    aria-label="Pertumbuhan pendapatan {{ $chartTotalRevenue['current_month_label'] }} dibanding {{ $chartTotalRevenue['previous_month_label'] }}"></div>
 
                 <div class="text-center fw-medium my-6">{{ $chartTotalRevenue['growth_note'] }}</div>
 
@@ -74,7 +51,7 @@
                             </span>
                         </div>
                         <div class="d-flex flex-column">
-                            <small>{{ $chartTotalRevenue['year'] }}</small>
+                            <small>Bulan Ini</small>
                             <h6 class="mb-0 text-nowrap">{{ $chartTotalRevenue['current_total_label'] }}</h6>
                         </div>
                     </div>
@@ -85,7 +62,7 @@
                             </span>
                         </div>
                         <div class="d-flex flex-column">
-                            <small>{{ $chartTotalRevenue['previous_year'] }}</small>
+                            <small>Bulan Lalu</small>
                             <h6 class="mb-0 text-nowrap">{{ $chartTotalRevenue['previous_total_label'] }}</h6>
                         </div>
                     </div>

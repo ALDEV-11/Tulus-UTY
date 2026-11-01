@@ -3,11 +3,7 @@
 <h4 class="mb-1">Lupa Password?</h4>
 <p class="mb-6">Masukkan email akun Anda. Kami akan mengirim tautan untuk mengatur ulang password.</p>
 
-@if (session('status'))
-    <div class="alert alert-success" role="alert">
-        {{ session('status') }}
-    </div>
-@endif
+
 
 <form method="POST" action="{{ route('password.email') }}" class="mb-6">
     @csrf

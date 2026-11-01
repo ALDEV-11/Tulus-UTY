@@ -44,7 +44,7 @@
 
         <li class="menu-item {{ request()->routeIs('admin.merk-motor.*') ? 'active' : '' }}">
             <a href="{{ route('admin.merk-motor.index') }}" class="menu-link" @if (request()->routeIs('admin.merk-motor.*')) aria-current="page" @endif>
-                <i class="menu-icon tf-icons bx bx-car" aria-hidden="true"></i>
+                <i class="menu-icon tf-icons bx bx-motorcycle" aria-hidden="true"></i>
                 <div class="text-truncate">Merk Motor</div>
             </a>
         </li>

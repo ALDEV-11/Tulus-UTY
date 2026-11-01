@@ -14,30 +14,9 @@
     <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/vendor/fonts/iconify-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/vendor/css/core.css') }}">
     <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/css/demo.css') }}">
+    <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/css/app-ui.css') }}">
     <link rel="stylesheet" href="{{ asset('dist-dashboard/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}">
     <style>
-        /* ── Admin table ── */
-        .admin-table .table > :not(caption) > * > * {
-            padding-block: 0.8rem;
-        }
-
-        .admin-table .btn-icon {
-            min-width: 2.75rem;
-            min-height: 2.75rem;
-        }
-
-        .admin-table .pagination .page-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 2.75rem;
-            min-height: 2.75rem;
-        }
-
-        .admin-table .table-responsive {
-            -webkit-overflow-scrolling: touch;
-        }
-
         /* ── Page header ── */
         @media (max-width: 575.98px) {
             .admin-page-header {
@@ -52,11 +31,6 @@
         /* ── Empty state ── */
         .py-8 {
             padding-block: 3rem !important;
-        }
-
-        /* ── Progress bar mini ── */
-        .admin-table .progress {
-            border-radius: 4px;
         }
 
         /* ── Form control plaintext dalam input-group ── */
@@ -130,19 +104,4 @@
             @include('admin.partials.navbar')
             <div class="content-wrapper">
                 <main id="main-content" class="container-xxl flex-grow-1 container-p-y">
-                    @if (session('status'))
-                        <div class="alert alert-success alert-dismissible fade show" role="status">
-                            {{ session('status') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-                        </div>
-                    @endif
-                    @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
-                        </div>
-                    @endif
+

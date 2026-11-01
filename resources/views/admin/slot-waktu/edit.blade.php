@@ -13,23 +13,13 @@
 
 <div class="row">
     <div class="col-12 col-xl-7 col-lg-9">
-        <div class="card">
-            <div class="card-header d-flex align-items-center gap-3 py-4">
-                <div class="avatar flex-shrink-0">
-                    <span class="avatar-initial rounded-circle bg-label-warning">
-                        <i class="icon-base bx bx-calendar-edit" aria-hidden="true"></i>
-                    </span>
-                </div>
-                <div>
-                    <h5 class="mb-0">{{ $slot->tanggal->translatedFormat('d M Y') }}</h5>
-                    <small class="text-body-secondary">
-                        <i class="icon-base bx bx-time me-1" aria-hidden="true"></i>
-                        {{ substr($slot->jam_mulai, 0, 5) }} – {{ substr($slot->jam_selesai, 0, 5) }}
-                        &bull; Kapasitas {{ $slot->kapasitas }} &bull; Terisi {{ $slot->reservasi_aktif_count }}
-                    </small>
-                </div>
-            </div>
-            <div class="card-body pt-0">
+        <div class="card app-form-card">
+            <x-ui.card-header
+                :title="$slot->tanggal->translatedFormat('d M Y')"
+                :subtitle="substr($slot->jam_mulai, 0, 5).' – '.substr($slot->jam_selesai, 0, 5).' · Kapasitas '.$slot->kapasitas.' · Terisi '.$slot->reservasi_aktif_count"
+                icon="bx bx-calendar-edit"
+                color="warning" />
+            <div class="card-body">
                 <form method="POST" action="{{ route('admin.slot-waktu.update', $slot) }}" id="form-edit-slot">
                     @include('admin.slot-waktu._edit-form', ['slot' => $slot])
                 </form>

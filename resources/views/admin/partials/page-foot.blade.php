@@ -12,7 +12,10 @@
 <script src="{{ asset('dist-dashboard/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 <script src="{{ asset('dist-dashboard/assets/vendor/js/menu.js') }}"></script>
 <script src="{{ asset('dist-dashboard/assets/js/main.js') }}"></script>
+<script src="{{ asset('dist-dashboard/assets/js/live-search.js') }}"></script>
 @include('admin.partials.realtime')
+<p class="visually-hidden" role="status" aria-live="polite" data-live-search-status></p>
+@include('partials.sweetalert')
 @stack('scripts')
 </body>
 </html>

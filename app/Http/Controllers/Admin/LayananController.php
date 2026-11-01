@@ -31,11 +31,8 @@ class LayananController extends Controller
     }
     public function destroy(Layanan $layanan): RedirectResponse
     {
-        if ($layanan->reservasi()->exists()) {
-            $layanan->update(['aktif' => false]);
-            return to_route('admin.layanan.index')->with('status', 'Layanan sudah dipakai, sehingga hanya dinonaktifkan.');
-        }
         $layanan->delete();
+
         return to_route('admin.layanan.index')->with('status', 'Layanan berhasil dihapus.');
     }
 }

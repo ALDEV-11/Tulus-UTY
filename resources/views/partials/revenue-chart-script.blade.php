@@ -34,8 +34,8 @@
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '55%',
-                        borderRadius: 8,
+                        columnWidth: '70%',
+                        borderRadius: 4,
                         startingShape: 'rounded',
                         endingShape: 'rounded',
                         borderRadiusApplication: 'around'

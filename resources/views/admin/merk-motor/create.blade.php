@@ -13,19 +13,13 @@
 
 <div class="row">
     <div class="col-12 col-xl-6 col-lg-8">
-        <div class="card">
-            <div class="card-header d-flex align-items-center gap-3 py-4">
-                <div class="avatar flex-shrink-0">
-                    <span class="avatar-initial rounded-circle bg-label-info">
-                        <i class="icon-base bx bx-car" aria-hidden="true"></i>
-                    </span>
-                </div>
-                <div>
-                    <h5 class="mb-0">Merk Baru</h5>
-                    <small class="text-body-secondary">Isi nama merk dan atur statusnya</small>
-                </div>
-            </div>
-            <div class="card-body pt-0">
+        <div class="card app-form-card">
+            <x-ui.card-header
+                title="Merk Baru"
+                subtitle="Isi nama merk dan atur statusnya"
+                icon="bx bx-motorcycle"
+                color="info" />
+            <div class="card-body">
                 <form method="POST" action="{{ route('admin.merk-motor.store') }}" id="form-tambah-merk">
                     @include('admin.merk-motor._form')
                 </form>

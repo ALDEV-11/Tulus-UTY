@@ -4,5 +4,10 @@
 @section('activeMenu', 'cek-slot')
 
 @section('content')
-    @include('partials.slot-availability')
+    @include('customer.partials.page-header', [
+        'title' => 'Cek Slot Servis',
+        'subtitle' => 'Pilih tanggal untuk melihat ketersediaan jam servis motor.',
+    ])
+
+    @include('partials.slot-availability', ['showHeading' => false])
 @endsection

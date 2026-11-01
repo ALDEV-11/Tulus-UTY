@@ -12,20 +12,12 @@
     'actionIcon' => 'bx bx-plus',
 ])
 
-<div class="card admin-table">
-    <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 py-4">
-        <div class="d-flex align-items-center gap-3">
-            <div class="avatar flex-shrink-0">
-                <span class="avatar-initial rounded-circle bg-label-primary">
-                    <i class="icon-base bx bx-wrench" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div>
-                <h5 class="mb-0">Daftar Layanan</h5>
-                <small class="text-body-secondary">Kelola layanan servis bengkel</small>
-            </div>
-        </div>
-    </div>
+<div class="card app-table-card">
+    <x-ui.card-header
+        title="Daftar Layanan"
+        subtitle="Kelola layanan servis bengkel"
+        icon="bx bx-wrench"
+        color="primary" />
 
     <div class="table-responsive">
         <table class="table align-middle mb-0">
@@ -50,26 +42,14 @@
                     @endphp
                     <tr>
                         <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="avatar avatar-sm flex-shrink-0">
-                                    <span class="avatar-initial rounded-circle bg-label-{{ $layanan->aktif ? 'primary' : 'secondary' }}">
-                                        <i class="icon-base bx bx-wrench" aria-hidden="true"></i>
-                                    </span>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">{{ $layanan->nama }}</div>
-                                    <div class="text-body-secondary small text-truncate" style="max-width: 22rem"
-                                         title="{{ $layanan->deskripsi ?: 'Belum ada deskripsi.' }}">
-                                        {{ $layanan->deskripsi ?: 'Belum ada deskripsi.' }}
-                                    </div>
-                                </div>
+                            <div class="fw-semibold">{{ $layanan->nama }}</div>
+                            <div class="text-body-secondary small text-truncate" style="max-width: 22rem"
+                                 title="{{ $layanan->deskripsi ?: 'Belum ada deskripsi.' }}">
+                                {{ $layanan->deskripsi ?: 'Belum ada deskripsi.' }}
                             </div>
                         </td>
                         <td class="text-nowrap">
-                            <div class="d-flex align-items-center gap-1">
-                                <i class="icon-base bx bx-time-five text-body-secondary" aria-hidden="true"></i>
-                                {{ $layanan->durasi_menit }} menit
-                            </div>
+                            {{ $layanan->durasi_menit }} menit
                         </td>
                         <td class="text-nowrap">
                             @if ($interval->isEmpty())
@@ -102,7 +82,7 @@
                                 method="POST"
                                 action="{{ route('admin.layanan.destroy', $layanan) }}"
                                 class="d-inline"
-                                onsubmit="return confirm('Hapus layanan ini? Layanan yang sudah dipakai reservasi akan dinonaktifkan.')">
+                                onsubmit="return confirm('Hapus layanan {{ $layanan->nama }} secara permanen?')">
                                 @csrf
                                 @method('DELETE')
                                 <button
@@ -118,23 +98,20 @@
                 @empty
                     <tr>
                         <td colspan="6">
-                            <div class="text-center py-8">
-                                <div class="avatar avatar-lg mb-3">
-                                    <span class="avatar-initial rounded-circle bg-label-primary">
-                                        <i class="icon-base bx bx-wrench icon-lg" aria-hidden="true"></i>
-                                    </span>
-                                </div>
-                                <h6 class="mb-1">Belum ada layanan</h6>
-                                <p class="text-body-secondary mb-4">Tambahkan layanan pertama beserta durasi dan interval servisnya.</p>
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-primary"
-                                    id="btn-tambah-layanan-empty"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalTambahLayanan">
-                                    <i class="icon-base bx bx-plus me-1" aria-hidden="true"></i>Tambah Layanan
-                                </button>
-                            </div>
+                            <x-ui.empty-state
+                                title="Belum ada layanan"
+                                description="Tambahkan layanan pertama beserta durasi dan interval servisnya.">
+                                <x-slot:action>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-primary"
+                                        id="btn-tambah-layanan-empty"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalTambahLayanan">
+                                        <i class="icon-base bx bx-plus me-1" aria-hidden="true"></i>Tambah Layanan
+                                    </button>
+                                </x-slot:action>
+                            </x-ui.empty-state>
                         </td>
                     </tr>
                 @endforelse
