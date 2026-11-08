@@ -1,0 +1,281 @@
+/* ==========================================================================
+   Shared application UI
+   Dipakai oleh layout admin dan customer agar bentuk card, header, toolbar,
+   status ringkasan, dan empty state selalu konsisten.
+   ========================================================================== */
+
+/* ── Page header ── */
+.app-page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .app-page-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-page-header .btn {
+        width: 100%;
+    }
+}
+
+/* ── Card header ── */
+.card-header.app-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+}
+
+.app-card-header-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+@media (min-width: 576px) {
+    .app-card-header-main {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.app-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.app-card-heading > div {
+    min-width: 0;
+}
+
+.app-card-heading h5 {
+    margin-bottom: 0;
+}
+
+.app-card-heading small {
+    display: block;
+}
+
+.app-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.app-card-actions .btn {
+    white-space: nowrap;
+}
+
+.app-card-toolbar {
+    padding-top: 1rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.app-card-toolbar .form-label {
+    margin-bottom: 0.35rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.app-card-toolbar .form-control,
+.app-card-toolbar .form-select {
+    min-height: 2.75rem;
+}
+
+.app-card-toolbar .btn {
+    min-height: 2.75rem;
+}
+
+/* ── Table card ── */
+.app-table-card .table > :not(caption) > * > * {
+    padding-block: 0.8rem;
+}
+
+.app-table-card .btn-icon {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+}
+
+.app-table-card .pagination .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+}
+
+.app-table-card .table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+.app-table-card .progress {
+    border-radius: 4px;
+}
+
+/* ── Empty state ── */
+.py-8 {
+    padding-block: 3rem !important;
+}
+
+.app-empty-state {
+    padding-block: 3rem;
+    color: var(--bs-body-color);
+}
+
+.app-empty-state p {
+    max-width: 34rem;
+    margin-inline: auto;
+}
+
+/* ── Status ringkasan ── */
+.app-status-summary-card {
+    overflow: hidden;
+}
+
+.app-status-summary-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+}
+
+.app-status-summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1px;
+    border-top: 1px solid var(--bs-border-color);
+    background-color: var(--bs-border-color);
+}
+
+.app-status-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    padding: 0.85rem 1rem;
+    background-color: var(--bs-card-bg);
+    color: var(--bs-body-color);
+    text-decoration: none;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-status-summary-item:hover,
+.app-status-summary-item:focus-visible {
+    background-color: var(--bs-tertiary-bg);
+    outline: 0;
+}
+
+.app-status-summary-item:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--bs-primary);
+}
+
+.app-status-summary-item.is-active {
+    background-color: var(--bs-primary-bg-subtle);
+    box-shadow: inset 0 -3px 0 var(--bs-primary);
+}
+
+.app-status-summary-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    line-height: 1.25;
+}
+
+.app-status-dot {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+}
+
+.app-status-summary-value {
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+@media (max-width: 991.98px) {
+    .app-status-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-status-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .app-status-summary-value {
+        font-size: 1.2rem;
+    }
+}
+
+/* ── Form card ── */
+.app-form-card .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+/* ── Live search ── */
+.live-search-results {
+    transition: opacity 0.15s ease-in-out;
+}
+
+.live-search-results[aria-busy="true"] {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+[data-live-search-group].is-loading [data-live-search-icon] .bx {
+    display: none;
+}
+
+[data-live-search-group].is-loading [data-live-search-icon]::after {
+    content: '';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: app-live-search-spin 0.65s linear infinite;
+}
+
+@keyframes app-live-search-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .live-search-results {
+        transition: none;
+    }
+
+    .app-status-summary-item {
+        transition: none;
+    }
+
+    [data-live-search-group].is-loading [data-live-search-icon]::after {
+        animation: none;
+    }
+}

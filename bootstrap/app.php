@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use App\Enums\UserRole;
+use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\NoCache;
+use App\Http\Middleware\RoleMiddleware;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'aktif' => EnsureUserIsActive::class,
+            'nocache' => NoCache::class,
+            'role' => RoleMiddleware::class,
+        ]);
+        $middleware->appendToGroup('web', EnsureUserIsActive::class);
+        $middleware->redirectUsersTo(function (Request $request): string {
+            return $request->user()?->role === UserRole::Admin
+                ? '/admin'
+                : '/booking-saya';
+        });
+    })
+    ->withBroadcasting(__DIR__.'/../routes/channels.php', [
+        'middleware' => ['web'],
+    ])
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })->create();
