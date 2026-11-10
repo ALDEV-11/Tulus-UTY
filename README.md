@@ -21,6 +21,40 @@ admin/pelanggan, data master bengkel, slot waktu, reservasi, servis, dan log Wha
 3. Jalankan `composer install`, `php artisan key:generate`, dan `php artisan migrate`.
 4. Jalankan `php artisan serve` atau buka URL Apache di atas.
 
+## Deploy ke Vercel
+
+Project ini memakai Docker + FrankenPHP agar Laravel berjalan sebagai aplikasi PHP
+penuh di Vercel. Import repository ini dari dashboard Vercel dan pilih konfigurasi
+Dockerfile pada pengaturan deployment.
+
+Sebelum deployment, siapkan MySQL yang dapat diakses dari internet (misalnya
+PlanetScale, Railway, Aiven, atau layanan MySQL lain). SQLite
+lokal tidak cocok untuk runtime Vercel karena filesystem container bersifat
+ephemeral.
+
+Set environment variables berikut di Vercel untuk Production dan Preview:
+
+- `APP_KEY`: hasil `php artisan key:generate --show`
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `APP_URL`: URL deployment Vercel
+- `DB_CONNECTION=mysql`
+- `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+- `SESSION_DRIVER=database`
+- `CACHE_STORE=database`
+- `QUEUE_CONNECTION=database`
+- `LOG_CHANNEL=stderr`
+
+Setelah deployment pertama, jalankan migrasi pada database produksi dari komputer
+yang memiliki akses ke database:
+
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+```
+
+Jangan mengunggah `.env`, kredensial database, atau `APP_KEY` ke repository.
+
 Bangun ulang database beserta seluruh data demo dengan:
 
 ```bash
