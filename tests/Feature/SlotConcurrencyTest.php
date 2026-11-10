@@ -10,14 +10,14 @@ use App\Models\MerkMotor;
 use App\Models\Reservasi;
 use App\Models\SlotWaktu;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class SlotConcurrencyTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private User $firstCustomer;
     private User $secondCustomer;
@@ -91,10 +91,6 @@ class SlotConcurrencyTest extends TestCase
 
     public function test_booking_locks_the_slot_row_for_update(): void
     {
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped('lockForUpdate hanya didukung oleh MySQL.');
-        }
-
         $queries = [];
 
         DB::listen(function ($query) use (&$queries) {

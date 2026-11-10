@@ -15,7 +15,7 @@ use App\Models\SlotWaktu;
 use App\Models\User;
 use App\Models\WhatsappLog;
 use App\Services\WhatsappLogService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
@@ -23,7 +23,7 @@ use Tests\TestCase;
 
 class ReservationFlowTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private User $admin;
 
@@ -247,7 +247,7 @@ class ReservationFlowTest extends TestCase
             ->assertJsonFragment(['kode' => $reservasi->kode]);
     }
 
-    public function test_admin_page_loads_echo_configuration_when_configured(): void
+    public function test_admin_page_loads_pusher_script_when_configured(): void
     {
         config([
             'broadcasting.default' => 'pusher',
@@ -259,9 +259,8 @@ class ReservationFlowTest extends TestCase
         $this->actingAs($this->admin)
             ->get(route('admin.reservasi.index'))
             ->assertOk()
-            ->assertSee('broadcast-auth-endpoint', false)
-            ->assertSee('build/assets/app-', false)
-            ->assertDontSee('js.pusher.com/8.4.0/pusher.min.js', false);
+            ->assertSee('js.pusher.com/8.4.0/pusher.min.js', false)
+            ->assertSee('private-admin.reservations', false);
     }
 
     public function test_customer_dashboard_and_whatsapp_log_page_load(): void

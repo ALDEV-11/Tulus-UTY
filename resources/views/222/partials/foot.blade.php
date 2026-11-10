@@ -11,6 +11,5 @@
     <script src="{{ asset('dist-dashboard/assets/vendor/js/menu.js') }}"></script>
     <script src="{{ asset('dist-dashboard/assets/js/main.js') }}"></script>
     @include('partials.sweetalert')
-    @include('partials.anti-back-cache')
   </body>
 </html>

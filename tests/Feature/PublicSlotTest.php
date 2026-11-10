@@ -10,13 +10,13 @@ use App\Models\Reservasi;
 use App\Models\SlotWaktu;
 use App\Models\User;
 use App\Services\SlotAvailabilityService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PublicSlotTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private User $customer;
     private MerkMotor $merk;

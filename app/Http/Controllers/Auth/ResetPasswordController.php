@@ -21,11 +21,6 @@ class ResetPasswordController extends Controller
 
     use ResetsPasswords;
 
-    public function __construct()
-    {
-        $this->middleware('guest');
-    }
-
     public function showResetForm(Request $request)
     {
         return view('222.passwords.reset')->with([

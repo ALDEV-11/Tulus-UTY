@@ -7,7 +7,6 @@ use App\Models\Kendaraan;
 use App\Policies\KendaraanPolicy;
 use App\Services\ReservationNotificationService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
@@ -28,9 +27,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        URL::forceScheme('https');
-
-
         Paginator::useBootstrapFive();
         Carbon::setLocale(config('app.locale'));
 

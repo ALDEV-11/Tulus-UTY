@@ -37,6 +37,10 @@
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="reservation-toast-container" aria-live="polite" aria-atomic="true"></div>
 
+@if ($pusherEnabled)
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+@endif
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const list = document.getElementById('reservation-notification-list');
@@ -44,6 +48,8 @@
         const countLabels = document.querySelectorAll('[data-reservation-count-label]');
         const toastContainer = document.getElementById('reservation-toast-container');
         const notificationsUrl = @json(route('admin.reservasi.notifications'));
+        const pusherKey = @json(config('broadcasting.connections.pusher.key'));
+        const pusherCluster = @json(config('broadcasting.connections.pusher.options.cluster', 'mt1'));
         const pusherEnabled = @json($pusherEnabled);
 
         if (!list) {
@@ -241,10 +247,29 @@
 
         let pusherReady = false;
 
-        if (pusherEnabled && window.Echo) {
+        if (pusherEnabled && window.Pusher) {
             try {
-                window.Echo.private('admin.reservations')
-                    .listen('.reservation.created', handlePayload);
+                const pusher = new window.Pusher(pusherKey, {
+                    cluster: pusherCluster,
+                    forceTLS: true,
+                    authEndpoint: @json(url('broadcasting/auth')),
+                    auth: {
+                        headers: {
+                            'X-CSRF-TOKEN': @json(csrf_token()),
+                        },
+                    },
+                });
+
+                const channel = pusher.subscribe('private-admin.reservations');
+
+                channel.bind('reservation.created', handlePayload);
+                channel.bind('pusher:subscription_error', function (status) {
+                    console.warn('Langganan channel notifikasi reservasi gagal.', status);
+                });
+
+                pusher.connection.bind('error', function (error) {
+                    console.warn('Koneksi Pusher bermasalah, notifikasi akan memakai polling.', error);
+                });
 
                 pusherReady = true;
             } catch (error) {

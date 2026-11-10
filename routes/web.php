@@ -12,58 +12,19 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Customer\KendaraanController;
 use App\Http\Controllers\Customer\ReservationController;
 use App\Http\Controllers\Customer\RiwayatServisController;
-use App\Http\Controllers\Auth\ConfirmPasswordController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
-use App\Models\Layanan;
-use App\Models\SlotWaktu;
-use App\Models\User;
 use App\Http\Controllers\PublicSlotController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $slotPertama = SlotWaktu::query()
-        ->where('aktif', true)
-        ->orderBy('tanggal')
-        ->orderBy('jam_mulai')
-        ->first(['jam_mulai']);
-    $slotTerakhir = SlotWaktu::query()
-        ->where('aktif', true)
-        ->orderByDesc('tanggal')
-        ->orderByDesc('jam_selesai')
-        ->first(['jam_selesai']);
-    $kontakBengkel = User::query()
-        ->where('role', 'admin')
-        ->where('aktif', true)
-        ->first(['no_hp', 'email']);
-
-    return view('welcome', [
-        'layanans' => Layanan::query()
-            ->where('aktif', true)
-            ->orderBy('nama')
-            ->get(),
-        'jamLayanan' => $slotPertama && $slotTerakhir
-            ? substr($slotPertama->jam_mulai, 0, 5).'–'.substr($slotTerakhir->jam_selesai, 0, 5)
-            : 'Belum diatur',
-        'kontakBengkel' => $kontakBengkel,
-    ]);
-})->name('welcome');
-
-Route::middleware('nocache')->group(function () {
-    Auth::routes([
-        'logout' => false,
-        'confirm' => false,
-    ]);
+    return view('welcome');
 });
+
+Auth::routes();
 
 Route::get('/cek-slot', [PublicSlotController::class, 'index'])->name('slot.publik');
 
-Route::middleware(['auth', 'nocache'])->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/password/confirm', [ConfirmPasswordController::class, 'showConfirmForm'])
-        ->name('password.confirm');
-    Route::post('/password/confirm', [ConfirmPasswordController::class, 'confirm']);
-
+Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     Route::get('/admin', [DashboardController::class, 'index'])->middleware('role:admin')->name('admin');

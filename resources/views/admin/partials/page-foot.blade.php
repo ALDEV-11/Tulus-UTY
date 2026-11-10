@@ -17,6 +17,5 @@
 <p class="visually-hidden" role="status" aria-live="polite" data-live-search-status></p>
 @include('partials.sweetalert')
 @stack('scripts')
-@include('partials.anti-back-cache')
 </body>
 </html>

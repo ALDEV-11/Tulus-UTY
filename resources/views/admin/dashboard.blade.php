@@ -15,7 +15,7 @@
         'dibatalkan' => 'secondary',
     ];
 
-    $statusReservasiColors = ['#C8DC00', '#0033A0', '#4C7DF0', '#D6001C', '#5B6578'];
+    $statusReservasiColors = ['#ffab00', '#696cff', '#03c3ec', '#71dd37', '#8592a3'];
     $totalStatusReservasi = array_sum($chartStatusReservasi['data']);
 @endphp
 

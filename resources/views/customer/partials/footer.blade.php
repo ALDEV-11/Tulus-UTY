@@ -5,7 +5,7 @@
                 &copy; {{ date('Y') }} {{ config('app.name') }}. Layanan reservasi servis motor.
             </div>
             <div class="d-none d-lg-inline-block text-body-secondary">
-                Made By Team TULUS UTY
+                Antarmuka memakai template Sneat.
             </div>
         </div>
     </div>

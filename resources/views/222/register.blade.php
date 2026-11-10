@@ -114,11 +114,6 @@
     <button type="submit" class="btn btn-primary d-grid w-100">Daftar</button>
 </form>
 
-<a class="auth-home-link d-flex align-items-center justify-content-center mt-4" href="{{ url('/') }}">
-    <i class="icon-base bx bx-arrow-back me-1" aria-hidden="true"></i>
-    Kembali ke Beranda
-</a>
-
 <p class="text-center mb-0">
     <span>Sudah punya akun?</span>
     <a href="{{ route('login') }}">

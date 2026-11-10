@@ -9,13 +9,13 @@ use App\Models\MerkMotor;
 use App\Models\Reservasi;
 use App\Models\SlotWaktu;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class KendaraanTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private User $customer;
     private User $otherCustomer;

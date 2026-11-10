@@ -3,8 +3,8 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="{{ route('booking-saya') }}" class="app-brand-link">
-            <span class="app-brand-logo demo">
-                <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="app-brand-image">
+            <span class="app-brand-logo demo text-primary">
+                <i class="icon-base bx bx-wrench icon-md" aria-hidden="true"></i>
             </span>
             <span class="app-brand-text demo menu-text fw-bold ms-2">{{ config('app.name') }}</span>
         </a>

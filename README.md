@@ -24,15 +24,13 @@ admin/pelanggan, data master bengkel, slot waktu, reservasi, servis, dan log Wha
 ## Deploy ke Vercel
 
 Project ini memakai Docker + FrankenPHP agar Laravel berjalan sebagai aplikasi PHP
-penuh di Vercel. Import repository ini dari dashboard Vercel dan pilih konfigurasi
+penuh di Vercel. Import repository ini dari dashboard Vercel dan gunakan konfigurasi
 Dockerfile pada pengaturan deployment.
 
-Sebelum deployment, siapkan MySQL yang dapat diakses dari internet (misalnya
-PlanetScale, Railway, Aiven, atau layanan MySQL lain). SQLite
-lokal tidak cocok untuk runtime Vercel karena filesystem container bersifat
-ephemeral.
+Sebelum deployment, siapkan MySQL yang dapat diakses dari internet. SQLite lokal
+tidak cocok untuk runtime Vercel karena filesystem container bersifat ephemeral.
 
-Set environment variables berikut di Vercel untuk Production dan Preview:
+Set environment variables berikut di Vercel:
 
 - `APP_KEY`: hasil `php artisan key:generate --show`
 - `APP_ENV=production`
@@ -45,12 +43,10 @@ Set environment variables berikut di Vercel untuk Production dan Preview:
 - `QUEUE_CONNECTION=database`
 - `LOG_CHANNEL=stderr`
 
-Setelah deployment pertama, jalankan migrasi pada database produksi dari komputer
-yang memiliki akses ke database:
+Setelah deployment pertama, jalankan migrasi pada database produksi:
 
 ```bash
 php artisan migrate --force
-php artisan db:seed --force
 ```
 
 Jangan mengunggah `.env`, kredensial database, atau `APP_KEY` ke repository.
@@ -85,8 +81,7 @@ disesuaikan pada controller, view, dan middleware. Fitur yang tersedia: register
 logout, reset password, konfirmasi password, dan Remember Me.
 
 Setelah login, admin diarahkan ke `/admin` dan pelanggan ke `/booking-saya`. Route `/home`
-meneruskan pengguna ke dashboard sesuai role. Setelah logout, pelanggan diarahkan ke halaman
-welcome (`/`) dan admin ke halaman login (`/login`).
+meneruskan pengguna ke dashboard sesuai role.
 
 Pembatasan akses dilakukan berlapis:
 
@@ -215,10 +210,6 @@ php artisan test --filter=ReservationFlowTest
 `SlotConcurrencyTest` menguji dua pelanggan yang memperebutkan slot terakhir secara
 berurutan dan memastikan query `lockForUpdate()` benar-benar dijalankan. Uji paralel
 sungguhan dengan dua koneksi database belum disertakan.
-
-Pengujian memakai SQLite in-memory yang diatur di `phpunit.xml`, sehingga tidak pernah
-menyentuh database MySQL `aldi-motor`. Asersi `lockForUpdate()` dilewati otomatis saat
-pengujian berjalan di SQLite karena penguncian baris hanya didukung MySQL.
 
 ## Reservasi, Notifikasi Real-Time, dan Log WhatsApp
 

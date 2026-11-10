@@ -73,17 +73,4 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
         $this->middleware('auth')->only('logout');
     }
-
-    public function logout(Request $request)
-    {
-        $isAdmin = $request->user()?->role === UserRole::Admin;
-
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return $isAdmin
-            ? redirect()->route('login')
-            : redirect()->route('welcome');
-    }
 }
